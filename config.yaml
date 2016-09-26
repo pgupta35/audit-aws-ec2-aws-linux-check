@@ -19,6 +19,11 @@ variables:
     required: true
     type: string
     default: "change"
+  AUDIT_AWS_EC2_TAG_EXAMPLE_EXPECTED_TAGS:
+    description: the tag we want to see on instances
+    required: true
+    type: string
+    default: "Name, DONT_DELETE_ME"
   AUDIT_AWS_EC2_TAG_EXAMPLE_REGIONS:
     description: list of AWS regions to check. Default is all regions
     required: true
