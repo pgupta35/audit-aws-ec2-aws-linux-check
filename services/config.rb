@@ -68,7 +68,7 @@ coreo_uni_util_notify "advise-ec2-notify-no-tags-older-than" do
 #  "violations": STACK::coreo_uni_util_jsrunner.ec2-runner-advise-no-tags-older-than.return }'
   payload 'STACK::coreo_uni_util_jsrunner.ec2-runner-advise-no-tags-older-than.return'
 #  payload_type "${AUDIT_AWS_EC2_TAG_EXAMPLE_PAYLOAD_TYPE}"
-  payload_type "text"
+  payload_type "json"
   endpoint ({
       :to => '${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT}', :subject => 'CloudCoreo ec2 advisor alerts on INSTANCE::stack_name :: INSTANCE::name'
   })
