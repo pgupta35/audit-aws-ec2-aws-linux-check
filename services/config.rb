@@ -2,10 +2,10 @@
 coreo_aws_advisor_alert "ec2-get-all-instances-older-than" do
   action :define
   service :ec2
-  description "find all EC2 instances that were launched prior to the specified time that do not have the specified tag"
-  category "cost"
-  suggested_action "terminate the instance"
-  level "warning"
+  description "EC2 instance was launched within the last 5 minutes that violates tag policy (does not have the necessary tags)."
+  category "Policy"
+  suggested_action "Review instance tags and terminate the instance if it does not comply to tagging policy."
+  level "Warning"
   objectives ["instances"]
   audit_objects ["reservation_set.instances_set.launch_time"]
   operators ["<"]
