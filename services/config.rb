@@ -63,11 +63,12 @@ coreo_uni_util_notify "advise-ec2-notify-no-tags-older-than" do
   payload '{"stack name":"INSTANCE::stack_name",
   "instance name":"INSTANCE::name",
   "number_of_checks":"STACK::coreo_aws_advisor_ec2.advise-ec2-get-all-instances-older-than.number_checks",
-  "number_of_violations":"STACK::coreo_aws_advisor_ec2.advise-ec2-get-all-instances-older-than.number_violations",
-  "number_violations_ignored":"STACK::coreo_aws_advisor_ec2.advise-ec2-get-all-instances-older-than.number_ignored_violations",
   "violations": STACK::coreo_uni_util_jsrunner.ec2-runner-advise-no-tags-older-than.return }'
   payload_type "${AUDIT_AWS_EC2_TAG_EXAMPLE_PAYLOAD_TYPE}"
   endpoint ({
       :to => '${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT}', :subject => 'CloudCoreo ec2 advisor alerts on INSTANCE::stack_name :: INSTANCE::name'
   })
 end
+
+#  "number_of_violations":"STACK::coreo_aws_advisor_ec2.advise-ec2-get-all-instances-older-than.number_violations",
+#  "number_violations_ignored":"STACK::coreo_aws_advisor_ec2.advise-ec2-get-all-instances-older-than.number_ignored_violations",
