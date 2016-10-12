@@ -61,7 +61,11 @@ for (instance_id in json_input) {
         if (num_present >= needed) {
           console.log("      instance has enough tags to pass. Need: " + needed + " and it has: " + num_present);          
         } else {
-          ret_alerts[instance_id] = json_input[instance_id];
+          raw_alert = json_input[instance_id];
+            region = raw_alert["violations"]["ec2-get-all-instances-older-than"]["region"];
+            raw_alert["violations"]["ec2-get-all-instances-older-than"]["kill_script"] = "aws ec2 terminate-instances --instance-ids " + instance_id;
+            raw_alert["violations"]["ec2-get-all-instances-older-than"]["aws_console"] = "https://console.aws.amazon.com/ec2/v2/home?region=" + region + "#Instances:search=" + instance_id + ";sort=vpcId";
+                ret_alerts[instance_id] = raw_alert;
           console.log("      instance is in violation: " + instance_id);
         
         }

@@ -28,7 +28,7 @@ variables:
     description: '"or" or "and"'
     required: true
     type: string
-    default: "and"
+    default: '"and"'
   AUDIT_AWS_EC2_TAG_EXAMPLE_REGIONS:
     description: list of AWS regions to check. Default is all regions
     required: true
