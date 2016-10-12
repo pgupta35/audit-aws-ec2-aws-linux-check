@@ -75,7 +75,7 @@ for (instance_id in json_input) {
         
         }
         if (kill_all_script.length > 0) {
-          ret_alerts["kill_script"] = kill_all_script;
+          ret_alerts["kill_all_script"] = kill_all_script;
         }
         throw BreakException;
       } catch (e) {
