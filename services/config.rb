@@ -38,20 +38,20 @@ for (instance_id in json_input) {
     var tag_names = [];
     for(var i = 0; i < tags.length; i++) {
         tag_names.push(tags[i]['key'])
-        console.log ("  has tag: " + tags[i]['key']);
+        //console.log ("  has tag: " + tags[i]['key']);
     }
     num_required = 0;
     num_present = 0;
 
     try {
         for(var i = 0; i < required_tags.length; i++){
-            console.log("    does it have tag " + required_tags[i] + "?");
+            //console.log("    does it have tag " + required_tags[i] + "?");
             if(tag_names.indexOf(required_tags[i]) == -1) {
-                console.log("      it does not.");              
+                //console.log("      it does not.");              
 
             } else {
               num_present++;
-              console.log("      it does! num_present is now: " + num_present);
+              //console.log("      it does! num_present is now: " + num_present);
             }
         }
         if (logic == "and") {
@@ -99,20 +99,20 @@ for (instance_id in json_input) {
     var tag_names = [];
     for(var i = 0; i < tags.length; i++) {
         tag_names.push(tags[i]['key'])
-        console.log ("  has tag: " + tags[i]['key']);
+        //console.log ("  has tag: " + tags[i]['key']);
     }
     num_required = 0;
     num_present = 0;
 
     try {
         for(var i = 0; i < required_tags.length; i++){
-            console.log("    does it have tag " + required_tags[i] + "?");
+            //console.log("    does it have tag " + required_tags[i] + "?");
             if(tag_names.indexOf(required_tags[i]) == -1) {
-                console.log("      it does not.");              
+                //console.log("      it does not.");              
 
             } else {
               num_present++;
-              console.log("      it does! num_present is now: " + num_present);
+              //console.log("      it does! num_present is now: " + num_present);
             }
         }
         if (logic == "and") {
