@@ -40,18 +40,34 @@ for (instance_id in json_input) {
         tag_names.push(tags[i]['key'])
         console.log ("  has tag: " + tags[i]['key']);
     }
+    logic = ${AUDIT_AWS_EC2_TAG_EXAMPLE_TAG_LOGIC}
+    num_required = 0;
+    num_present = 0;
     try {
         for(var i = 0; i < required_tags.length; i++){
             console.log("    does it have tag " + required_tags[i] + "?");
             if(tag_names.indexOf(required_tags[i]) == -1) {
-                ret_alerts[instance_id] = json_input[instance_id];
-                console.log("      instance is in violation: " + instance_id);
-                throw BreakException;
+                console.log("      it does not.");              
+
             } else {
-              console.log("      it does!");
+              num_present++;
+              console.log("      it does! num_present is now: " + num_present);
             }
         }
-    } catch (e) {
+        if (logic == "and") {
+          needed = required_tags.length;
+        } else {
+          needed = 1;  
+        }
+        if (num_present >= needed) {
+          console.log("      instance has enough tags to pass. Need: " + needed + " and it has: " + num_present);          
+        } else {
+          ret_alerts[instance_id] = json_input[instance_id];
+          console.log("      instance is in violation: " + instance_id);
+        
+        }
+        throw BreakException;
+      } catch (e) {
         if (e !== BreakException) throw e;
     }
 }

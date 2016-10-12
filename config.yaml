@@ -24,6 +24,11 @@ variables:
     required: true
     type: string
     default: '"DONT_DELETE_ME", "REALLY_DONT_DELETE_ME"'
+  AUDIT_AWS_EC2_TAG_EXAMPLE_TAG_LOGIC:
+    description: "or" or "and"
+    required: true
+    type: string
+    default: "and"
   AUDIT_AWS_EC2_TAG_EXAMPLE_REGIONS:
     description: list of AWS regions to check. Default is all regions
     required: true
