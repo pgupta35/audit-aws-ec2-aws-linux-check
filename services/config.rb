@@ -28,6 +28,12 @@ coreo_uni_util_jsrunner "ec2-runner-advise-no-tags-older-than" do
 required_tags = [
     ${AUDIT_AWS_EC2_TAG_EXAMPLE_EXPECTED_TAGS}
 ];
+// implement case-insensitive
+required_tags_lower = [];
+console.log(required_tags_lower);
+for (var i = 0; i < required_tags.length; i++) {
+  required_tags_lower.push(required_tags[i].toLowerCase());
+};
 logic = ${AUDIT_AWS_EC2_TAG_EXAMPLE_TAG_LOGIC};
 if (logic == "") {logic = "and";}
 ret_alerts = {};
@@ -48,13 +54,9 @@ for (instance_id in json_input) {
     num_present = 0;
 
     try {
-        for(var i = 0; i < required_tags.length; i++){
-            //console.log("    does it have tag " + required_tags[i] + "?");
-
-            // implement case-insensitive
-            required_tag = required_tags[i];
-            required_tag = required_tag.toLowerCase();
-            if(tag_names.indexOf(required_tags[i]) == -1) {
+        for(var i = 0; i < required_tags_lower.length; i++){
+            //console.log("    does it have tag " + required_tags_lower[i] + "?");
+            if(tag_names.indexOf(required_tags_lower[i]) == -1) {
                 //console.log("      it does not.");              
             } else {
               num_present++;
@@ -62,7 +64,7 @@ for (instance_id in json_input) {
             }
         }
         if (logic == "and") {
-          needed = required_tags.length;
+          needed = required_tags_lower.length;
         } else {
           needed = 1;  
         }
@@ -97,6 +99,12 @@ coreo_uni_util_jsrunner "ec2-runner-advise-no-tags-older-than-kill-all-script" d
 required_tags = [
     ${AUDIT_AWS_EC2_TAG_EXAMPLE_EXPECTED_TAGS}
 ];
+// implement case-insensitive
+required_tags_lower = [];
+for (var i = 0; i < required_tags.length; i++) {
+  required_tags_lower.push(required_tags[i].toLowerCase());
+};
+console.log(required_tags_lower);
 logic = ${AUDIT_AWS_EC2_TAG_EXAMPLE_TAG_LOGIC};
 if (logic == "") {logic = "and";}
 ret_alerts = {};
@@ -118,13 +126,9 @@ for (instance_id in json_input) {
     num_present = 0;
 
     try {
-        for(var i = 0; i < required_tags.length; i++){
-            //console.log("    does it have tag " + required_tags[i] + "?");
-
-            // implement case-insensitive
-            required_tag = required_tags[i];
-            required_tag = required_tag.toLowerCase();
-            if(tag_names.indexOf(required_tags[i]) == -1) {
+        for(var i = 0; i < required_tags_lower.length; i++){
+            //console.log("    does it have tag " + required_tags_lower[i] + "?");
+            if(tag_names.indexOf(required_tags_lower[i]) == -1) {
                 //console.log("      it does not.");              
             } else {
               num_present++;
@@ -132,7 +136,7 @@ for (instance_id in json_input) {
             }
         }
         if (logic == "and") {
-          needed = required_tags.length;
+          needed = required_tags_lower.length;
         } else {
           needed = 1;  
         }
