@@ -130,7 +130,7 @@ for (instance_id in json_input) {
           console.log("      instance has enough tags to pass. Need: " + needed + " and it has: " + num_present);          
         } else {
             kill_cmd = "aws ec2 terminate-instances --instance-ids " + instance_id;
-            kill_all_script = kill_all_script + kill_cmd + "\u000d";
+            kill_all_script = kill_all_script + kill_cmd + "\u000A";
             console.log("      instance is in violation: " + instance_id);
         
         }
