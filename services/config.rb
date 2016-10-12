@@ -31,7 +31,6 @@ required_tags = [
 logic = ${AUDIT_AWS_EC2_TAG_EXAMPLE_TAG_LOGIC};
 ret_alerts = {};
 var BreakException = {};
-kill_all_script = [];
 
 for (instance_id in json_input) {
     console.log("examining instance: " + instance_id);
@@ -68,14 +67,9 @@ for (instance_id in json_input) {
             kill_cmd = "aws ec2 terminate-instances --instance-ids " + instance_id;
             raw_alert["violations"]["ec2-get-all-instances-older-than"]["kill_script"] = kill_cmd;
             raw_alert["violations"]["ec2-get-all-instances-older-than"]["aws_console"] = "https://console.aws.amazon.com/ec2/v2/home?region=" + region + "#Instances:search=" + instance_id + ";sort=vpcId";
-            ret = kill_all_script.push(kill_cmd);
-            console.log("      ret: " + ret + " kill_cmd: " + kill_cmd);
             ret_alerts[instance_id] = raw_alert;
           console.log("      instance is in violation: " + instance_id);
         
-        }
-        if (kill_all_script.length > 0) {
-          ret_alerts["kill_all_script"] = kill_all_script;
         }
         throw BreakException;
       } catch (e) {
@@ -153,7 +147,7 @@ coreo_uni_util_notify "advise-ec2-notify-no-tags-older-than" do
   "instance name":"INSTANCE::name",
   "number_of_checks":"STACK::coreo_aws_advisor_ec2.advise-ec2-get-all-instances-older-than.number_checks",
   "violations": STACK::coreo_uni_util_jsrunner.ec2-runner-advise-no-tags-older-than.return }'
-  payload_type "${AUDIT_AWS_EC2_TAG_EXAMPLE_PAYLOAD_TYPE}"
+  payload_type "json"
   endpoint ({
       :to => '${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT}', :subject => 'CloudCoreo ec2 advisor alerts on INSTANCE::stack_name :: INSTANCE::name'
   })

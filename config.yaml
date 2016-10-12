@@ -9,11 +9,6 @@ variables:
     required: true
     type: string
     default: false
-  AUDIT_AWS_EC2_TAG_EXAMPLE_PAYLOAD_TYPE:
-    description: json or text
-    required: true
-    type: string
-    default: "json"
   AUDIT_AWS_EC2_TAG_EXAMPLE_SEND_ON:
     description: always or change
     required: true
