@@ -42,7 +42,7 @@ for (instance_id in json_input) {
     }
     num_required = 0;
     num_present = 0;
-    kill_all_script = {};
+    kill_all_script = [];
     try {
         for(var i = 0; i < required_tags.length; i++){
             console.log("    does it have tag " + required_tags[i] + "?");
