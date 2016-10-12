@@ -33,17 +33,22 @@ ret_alerts = {};
 var BreakException = {};
 
 for (instance_id in json_input) {
+    console.log("examining instance: " + instance_id);
     tags = json_input[instance_id]["tags"];
     var tag_names = [];
     for(var i = 0; i < tags.length; i++) {
         tag_names.push(tags[i]['key'])
+        console.log ("  has tag: " + tags[i]['key']);
     }
     try {
         for(var i = 0; i < required_tags.length; i++){
+            console.log("    does it have tag " + required_tags[i] + "?");
             if(tag_names.indexOf(required_tags[i]) == -1) {
                 ret_alerts[instance_id] = json_input[instance_id];
-                console.log("instance is in violation: " + instance_id);
+                console.log("      instance is in violation: " + instance_id);
                 throw BreakException;
+            } else {
+              console.log("      it does!");
             }
         }
     } catch (e) {
