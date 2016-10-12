@@ -30,7 +30,6 @@ required_tags = [
 ];
 // implement case-insensitive
 required_tags_lower = [];
-console.log(required_tags_lower);
 for (var i = 0; i < required_tags.length; i++) {
   required_tags_lower.push(required_tags[i].toLowerCase());
 };
@@ -104,7 +103,6 @@ required_tags_lower = [];
 for (var i = 0; i < required_tags.length; i++) {
   required_tags_lower.push(required_tags[i].toLowerCase());
 };
-console.log(required_tags_lower);
 logic = ${AUDIT_AWS_EC2_TAG_EXAMPLE_TAG_LOGIC};
 if (logic == "") {logic = "and";}
 ret_alerts = {};
