@@ -23,7 +23,7 @@ variables:
     description: the tag we want to see on instances
     required: true
     type: string
-    default: "DONT_DELETE_ME"
+    default: "DONT_DELETE_ME", "REALLY_DONT_DELETE_ME"
   AUDIT_AWS_EC2_TAG_EXAMPLE_REGIONS:
     description: list of AWS regions to check. Default is all regions
     required: true
