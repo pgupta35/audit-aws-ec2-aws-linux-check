@@ -28,7 +28,7 @@ coreo_uni_util_jsrunner "ec2-runner-advise-no-tags-older-than" do
 required_tags = [
     ${AUDIT_AWS_EC2_TAG_EXAMPLE_EXPECTED_TAGS}
 ];
-
+logic = ${AUDIT_AWS_EC2_TAG_EXAMPLE_TAG_LOGIC};
 ret_alerts = {};
 var BreakException = {};
 
@@ -40,7 +40,6 @@ for (instance_id in json_input) {
         tag_names.push(tags[i]['key'])
         console.log ("  has tag: " + tags[i]['key']);
     }
-    logic = ${AUDIT_AWS_EC2_TAG_EXAMPLE_TAG_LOGIC}
     num_required = 0;
     num_present = 0;
     try {
