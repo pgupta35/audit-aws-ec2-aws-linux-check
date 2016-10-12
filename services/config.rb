@@ -31,6 +31,7 @@ required_tags = [
 logic = ${AUDIT_AWS_EC2_TAG_EXAMPLE_TAG_LOGIC};
 ret_alerts = {};
 var BreakException = {};
+kill_all_script = [];
 
 for (instance_id in json_input) {
     console.log("examining instance: " + instance_id);
@@ -42,7 +43,7 @@ for (instance_id in json_input) {
     }
     num_required = 0;
     num_present = 0;
-    kill_all_script = [];
+
     try {
         for(var i = 0; i < required_tags.length; i++){
             console.log("    does it have tag " + required_tags[i] + "?");
@@ -67,7 +68,8 @@ for (instance_id in json_input) {
             kill_cmd = "aws ec2 terminate-instances --instance-ids " + instance_id;
             raw_alert["violations"]["ec2-get-all-instances-older-than"]["kill_script"] = kill_cmd;
             raw_alert["violations"]["ec2-get-all-instances-older-than"]["aws_console"] = "https://console.aws.amazon.com/ec2/v2/home?region=" + region + "#Instances:search=" + instance_id + ";sort=vpcId";
-            kill_all_script.push(kill_cmd);
+            ret = kill_all_script.push(kill_cmd);
+            console.log("      ret: " + ret + " kill_cmd: " + kill_cmd);
             ret_alerts[instance_id] = raw_alert;
           console.log("      instance is in violation: " + instance_id);
         
