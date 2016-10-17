@@ -18,7 +18,7 @@ variables:
     description: the tag we want to see on instances
     required: true
     type: string
-    default: '"DONT_DELETE_ME", "REALLY_DONT_DELETE_ME"'
+    default: '"EXAMPLE_TAG_1", "EXAMPLE_TAG_2"'
   AUDIT_AWS_EC2_TAG_EXAMPLE_TAG_LOGIC:
     description: '"or" or "and"'
     required: true
