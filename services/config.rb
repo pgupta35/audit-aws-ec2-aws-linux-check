@@ -99,7 +99,7 @@ required_tags_lower = [];
 for (var i = 0; i < required_tags.length; i++) {
   required_tags_lower.push(required_tags[i].toLowerCase());
 };
-required_tags_lower_string = required_tags_lower.toString();
+required_tags_lower_string = required_tags_lower.toString().replace(/,/g,', ');;
 logic = "and";
 if (logic == "") {logic = "and";}
 ret_alerts = {};
@@ -116,9 +116,9 @@ for (instance_id in json_input) {
         inst_tag = tags[i]['key'];
         inst_tag = inst_tag.toLowerCase();
         tag_names.push(inst_tag);
-        inst_tags_string = inst_tags_string + inst_tag + ",";
+        inst_tags_string = inst_tags_string + inst_tag + ", ";
     }
-    inst_tags_string = inst_tags_string.replace(/,$/, "");
+    inst_tags_string = inst_tags_string.replace(/, $/, "");
     num_required = 0;
     num_present = 0;
         for(var i = 0; i < required_tags_lower.length; i++){
@@ -225,7 +225,7 @@ for (instance_id in json_input) {
           console.log("      instance has enough tags to pass. Need: " + needed + " and it has: " + num_present);          
         } else {
           kill_cmd = "aws ec2 terminate-instances --instance-ids " + instance_id;
-          kill_all_script = kill_all_script + kill_cmd + "\\\n";
+          kill_all_script = kill_all_script + kill_cmd + "\\n";
           console.log("      instance is in violation: " + instance_id);
         
         }
