@@ -234,7 +234,9 @@ for (instance_id in json_input) {
         if (e !== BreakException) throw e;
     }
 }
-
+if (kill_all_script.length() > 0) {
+  kill_all_script = "#!/bin/bash\\n" + kill_all_script;
+}
 callback(kill_all_script)
   EOH
 end
