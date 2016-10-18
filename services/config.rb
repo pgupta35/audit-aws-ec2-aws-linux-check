@@ -244,7 +244,7 @@ for (instance_id in json_input) {
     }
 }
 if (kill_all_script.length > 0) {
-  kill_all_script = "#!/bin/bash\\n\\n# number of instances: " + num_instances + "\\n# number in violation: " + num_violations + kill_all_script;
+  kill_all_script = "#!/bin/bash\\n\\n# number of instances: " + num_instances + "\\n# number in violation: " + num_violations + "\\n\\n" + kill_all_script;
 } else {
   kill_all_script = "# number of instances: " + num_instances + "\\n# no instances are in violation\\n\\n";
 }
