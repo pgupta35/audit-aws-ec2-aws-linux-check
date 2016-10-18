@@ -259,11 +259,10 @@ coreo_uni_util_notify "advise-ec2-notify-no-tags-older-than" do
   type 'email'
   allow_empty ${AUDIT_AWS_EC2_TAG_EXAMPLE_ALLOW_EMPTY}
   send_on "${AUDIT_AWS_EC2_TAG_EXAMPLE_SEND_ON}"
-  payload 'STACK::coreo_uni_util_jsrunner.ec2-runner-advise-no-tags-older-than.return
-  <p></p>
-  <p>stack name: INSTANCE::stack_name </p>
-  <p>instance name: INSTANCE::name </p>
-  <p>number of instances checked: STACK::coreo_aws_advisor_ec2.advise-ec2-get-all-instances-older-than.number_checks </p>
+  payload '
+  STACK::coreo_uni_util_jsrunner.ec2-runner-advise-no-tags-older-than.return
+  <p>stack name: INSTANCE::stack_name</p>
+  <p>instance name: INSTANCE::name</p>
   '
   payload_type "html"
   endpoint ({
