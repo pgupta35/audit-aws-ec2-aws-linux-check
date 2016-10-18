@@ -105,8 +105,11 @@ if (logic == "") {logic = "and";}
 ret_alerts = {};
 ret_table = "[";
 var BreakException = {};
+num_violations = 0;
+num_instances = 0;
 for (instance_id in json_input) {
   inst_tags_string = "";
+  num_instances++;
     console.log("examining instance: " + instance_id);
     tags = json_input[instance_id]["tags"];
     var tag_names = [];
@@ -138,6 +141,7 @@ for (instance_id in json_input) {
         if (num_present >= needed) {
           console.log("      instance has enough tags to pass. Need: " + needed + " and it has: " + num_present);          
         } else {
+            num_violations++;
             raw_alert = json_input[instance_id];
             region = raw_alert["violations"]["ec2-get-all-instances-older-than"]["region"];
             kill_cmd = "aws ec2 terminate-instances --instance-ids " + instance_id;
@@ -162,7 +166,8 @@ for (instance_id in json_input) {
     // https://d1qb2nb5cznatu.cloudfront.net/startups/i/701250-e3792035663a30915a0b9ab26293b85b-medium_jpg.jpg?buster=1432673112
     html1 = '<p>Alerts powered by <img src="https://d1qb2nb5cznatu.cloudfront.net/startups/i/701250-e3792035663a30915a0b9ab26293b85b-medium_jpg.jpg?buster=1432673112"></p>';
     html2 = "<p>AWS tags required: " + required_tags_lower_string + "</p><p>logic: " + logic + "</p>";
-    html = html1 + html2 + html;
+    html3 = "<p>Number of Instances: " + num_instances + "</p><p>Number in Violation: " + num_violations + "</p>";
+    html = html1 + html2 + html3 + html;
     // add style
     html = style_section + html;
     callback(html);
@@ -191,8 +196,11 @@ if (logic == "") {logic = "and";}
 ret_alerts = {};
 var BreakException = {};
 kill_all_script = "";
+num_violations = 0;
+num_instances = 0;
 
 for (instance_id in json_input) {
+    num_instances++;
     console.log("examining instance: " + instance_id);
     tags = json_input[instance_id]["tags"];
     var tag_names = [];
@@ -224,6 +232,7 @@ for (instance_id in json_input) {
         if (num_present >= needed) {
           console.log("      instance has enough tags to pass. Need: " + needed + " and it has: " + num_present);          
         } else {
+          num_violations++;
           kill_cmd = "aws ec2 terminate-instances --instance-ids " + instance_id;
           kill_all_script = kill_all_script + kill_cmd + "\\n";
           console.log("      instance is in violation: " + instance_id);
@@ -235,7 +244,9 @@ for (instance_id in json_input) {
     }
 }
 if (kill_all_script.length > 0) {
-  kill_all_script = "#!/bin/bash\\n" + kill_all_script;
+  kill_all_script = "#!/bin/bash\\n# number of instances: " + num_instances + "\\n# number in violation: " + num_violations + kill_all_script;
+} else {
+  kill_all_script = "# number of instances: " + num_instances + "\\n# no instances are in violation";
 }
 callback(kill_all_script)
   EOH
