@@ -24,7 +24,7 @@ coreo_aws_advisor_alert "ec2-aws-linux-latest-not" do
   description "Alerts on EC2 instances that were not launched from the latest AWS Linux AMI."
   category "TBS"
   suggested_action "TBS"
-  level "TBS"
+  level "Informational"
   objectives ["instances"]
   audit_objects ["reservation_set.instances_set.image_id"]
   operators ["!="]
