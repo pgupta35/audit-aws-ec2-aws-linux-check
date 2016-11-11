@@ -43,7 +43,7 @@ coreo_aws_advisor_ec2 "advise-ec2-samples-2" do
   alerts ["ec2-aws-linux-latest-not"]
   action :advise
   regions
-    - PLAN::region
+    - "${REGION}"
 end
 
 # ################################################################
