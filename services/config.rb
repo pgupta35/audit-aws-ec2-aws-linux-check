@@ -373,6 +373,17 @@ num_instances = 0;
 for (instance_id in json_input) {
   num_instances++;
   console.log("examining instance: " + instance_id);
+  tags = json_input[instance_id]["tags"];
+  var tag_names = [];
+  for(var i = 0; i < tags.length; i++) {
+    //console.log ("  has tag: " + tags[i]['key']);
+    // implement case-insensitive
+    inst_tag = tags[i]['key'];
+    inst_tag = inst_tag.toLowerCase();
+    tag_names.push(inst_tag);
+    inst_tags_string = inst_tags_string + inst_tag + ", ";
+  }
+  inst_tags_string = inst_tags_string.replace(/, $/, "");
   num_violations++;
   raw_alert = json_input[instance_id];
   region = raw_alert["violations"]["ec2-aws-linux-latest-not"]["region"];
