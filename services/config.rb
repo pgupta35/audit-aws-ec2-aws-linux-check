@@ -270,7 +270,7 @@ end
 # send email to recipient that contains the html table of violating instances
 #
 coreo_uni_util_notify "advise-ec2-notify-no-tags-older-than" do
-  action :run
+  action :notify
   type 'email'
   allow_empty ${AUDIT_AWS_EC2_TAG_EXAMPLE_ALLOW_EMPTY}
   send_on "${AUDIT_AWS_EC2_TAG_EXAMPLE_SEND_ON}"
@@ -288,7 +288,7 @@ end
 # send email to recipient that contains just the shell script to terminate instances
 #
 coreo_uni_util_notify "advise-ec2-notify-no-tags-older-than-kill-all-script" do
-  action :run
+  action :notify
   type 'email'
   allow_empty ${AUDIT_AWS_EC2_TAG_EXAMPLE_ALLOW_EMPTY}
   send_on "${AUDIT_AWS_EC2_TAG_EXAMPLE_SEND_ON}"
