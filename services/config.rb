@@ -375,6 +375,7 @@ for (instance_id in json_input) {
   console.log("examining instance: " + instance_id);
   tags = json_input[instance_id]["tags"];
   var tag_names = [];
+  inst_tags_string = "";
   for(var i = 0; i < tags.length; i++) {
     //console.log ("  has tag: " + tags[i]['key']);
     // implement case-insensitive
