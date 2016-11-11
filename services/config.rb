@@ -42,7 +42,8 @@ end
 coreo_aws_advisor_ec2 "advise-ec2-samples-2" do
   alerts ["ec2-aws-linux-latest-not"]
   action :advise
-  regions ${AUDIT_AWS_EC2_TAG_EXAMPLE_REGIONS}
+  regions
+    - PLAN::region
 end
 
 # ################################################################
@@ -115,25 +116,18 @@ content : null;\
 }\
 </style>\
 ";
-// implement case-insensitive
-required_tags_lower = [];
-for (var i = 0; i < required_tags.length; i++) {
-  required_tags_lower.push(required_tags[i].toLowerCase());
-};
-required_tags_lower_string = required_tags_lower.toString().replace(/,/g,', ');;
-logic = ${AUDIT_AWS_EC2_TAG_EXAMPLE_TAG_LOGIC};
-if (logic == "") {logic = "and";}
+
 ret_alerts = {};
 ret_table = "[";
 var BreakException = {};
 num_violations = 0;
 num_instances = 0;
 for (instance_id in json_input) {
-  inst_tags_string = "";
   num_instances++;
-    console.log("examining instance: " + instance_id);
+  console.log("examining instance: " + instance_id);
     tags = json_input[instance_id]["tags"];
     var tag_names = [];
+    inst_tags_string = "";
     for(var i = 0; i < tags.length; i++) {
         //console.log ("  has tag: " + tags[i]['key']);
         // implement case-insensitive
@@ -143,55 +137,29 @@ for (instance_id in json_input) {
         inst_tags_string = inst_tags_string + inst_tag + ", ";
     }
     inst_tags_string = inst_tags_string.replace(/, $/, "");
-    num_required = 0;
-    num_present = 0;
-        for(var i = 0; i < required_tags_lower.length; i++){
-            //console.log("    does it have tag " + required_tags_lower[i] + "?");
-            if(tag_names.indexOf(required_tags_lower[i]) == -1) {
-                //console.log("      it does not.");              
-            } else {
-              num_present++;
-              //console.log("      it does! num_present is now: " + num_present);
-            }
-        }
-        if (logic == "and") {
-          needed = required_tags_lower.length;
-        } else {
-          needed = 1;  
-        }
-        if (num_present >= needed) {
-          console.log("      instance has enough tags to pass. Need: " + needed + " and it has: " + num_present);          
-        } else {
-            num_violations++;
-            raw_alert = json_input[instance_id];
-            region = raw_alert["violations"]["ec2-get-all-instances-older-than"]["region"];
-            kill_cmd = "aws ec2 terminate-instances --instance-ids " + instance_id;
-            //aws_console = "https://console.aws.amazon.com/ec2/v2/home?region=" + region + "#Instances:search=" + instance_id + ";sort=vpcId";
-            aws_console = "https://console.aws.amazon.com/ec2/v2/home?region=" + region + "#Instances:search=" + instance_id + "";
-            // leave off the violating_object to reduce size of the json
-            aws_console_html = "<a href=" + aws_console + ">AWS Console</a>";
-            raw_alert["violations"]["ec2-get-all-instances-older-than"]["violating_object"] = {};
-            raw_alert["violations"]["ec2-get-all-instances-older-than"]["kill_script"] = kill_cmd;
-            raw_alert["violations"]["ec2-get-all-instances-older-than"]["aws_console"] = aws_console;
-            ret_alerts[instance_id] = raw_alert;
-            ret_table = ret_table + '{"instance id" : "' + instance_id + '", "region" : "' + region + '", "kill script" : "' + kill_cmd + '", "aws link" : "' + aws_console_html + '","aws tags" : "' + inst_tags_string + '"}, ';
-            console.log("      instance is in violation: " + instance_id);
-        }
-
+    num_violations++;
+  raw_alert = json_input[instance_id];
+  region = raw_alert["violations"]["ec2-aws-linux-latest-not"]["region"];
+    ami_string = raw_alert["violations"]["ec2-aws-linux-latest-not"]["violating_object"]["0"]["object"]["image_id"];
+  aws_console = "https://console.aws.amazon.com/ec2/v2/home?region=" + region + "#Instances:search=" + instance_id + "";
+  // leave off the violating_object to reduce size of the json
+  aws_console_html = "<a href=" + aws_console + ">AWS Console</a>";
+  raw_alert["violations"]["ec2-aws-linux-latest-not"]["violating_object"] = {};
+  raw_alert["violations"]["ec2-aws-linux-latest-not"]["aws_console"] = aws_console;   raw_alert["violations"]["ec2-aws-linux-latest-not"]["ami_string"] = ami_string;
+  ret_alerts[instance_id] = raw_alert;
+  ret_table = ret_table + '{"instance id" : "' + instance_id + '", "region" : "' + region + '", "ami" : "' + ami_string + '", "aws link" : "' + aws_console_html + '","aws tags" : "' + inst_tags_string + '"}, ';
+  console.log("      instance is in violation: " + instance_id);
 }
-    ret_table = ret_table.replace(/, $/, "");
-    ret_table = ret_table + "]";
-    ret_obj = JSON.parse(ret_table);
-    html = tableify(ret_obj);
-    // https://www.cloudcoreo.com/img/logo/logo.png
-    // https://d1qb2nb5cznatu.cloudfront.net/startups/i/701250-e3792035663a30915a0b9ab26293b85b-medium_jpg.jpg?buster=1432673112
-    html1 = '<p>Alerts powered by <img src="https://d1qb2nb5cznatu.cloudfront.net/startups/i/701250-e3792035663a30915a0b9ab26293b85b-medium_jpg.jpg?buster=1432673112"></p>';
-    html2 = "<p>AWS tags required: " + required_tags_lower_string + "</p><p>logic: " + logic + "</p>";
-    html3 = "<p>Number of Instances: " + num_instances + "</p><p>Number in Violation: " + num_violations + "</p>";
-    html = html1 + html2 + html3 + html;
-    // add style
-    html = style_section + html;
-    callback(html);
+ret_table = ret_table.replace(/, $/, "");
+ret_table = ret_table + "]";
+ret_obj = JSON.parse(ret_table);
+html = tableify(ret_obj);
+html1 = '<p>Alerts powered by <img src="https://d1qb2nb5cznatu.cloudfront.net/startups/i/701250-e3792035663a30915a0b9ab26293b85b-medium_jpg.jpg?buster=1432673112"></p>';
+html3 = "<p>Instances not started on latest AWS Linux AMI:</p><p>Number in Violation: " + num_violations + "</p>";
+html = html1 + html3 + html;
+// add style
+html = style_section + html;
+callback(html);
 
 EOH
 end
@@ -287,7 +255,7 @@ coreo_uni_util_notify "advise-ec2-notify-no-tags-older-than" do
   '
   payload_type "html"
   endpoint ({
-      :to => '${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT}', :subject => 'CloudCoreo ec2 advisor alerts on PLAN::stack_name :: PLAN::name'
+      :to => '${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT}', :subject => 'Untagged EC2 Instances: PLAN::stack_name :: PLAN::name'
   })
 end
 
@@ -301,7 +269,7 @@ coreo_uni_util_notify "advise-ec2-notify-no-tags-older-than-kill-all-script" do
   payload 'COMPOSITE::coreo_uni_util_jsrunner.ec2-runner-advise-no-tags-older-than-kill-all-script.return'
   payload_type "text"
   endpoint ({
-      :to => '${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT}', :subject => 'CloudCoreo ec2 advisor alerts on PLAN::stack_name :: PLAN::name'
+      :to => '${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT}', :subject => 'Untagged EC2 Instances kill script: PLAN::stack_name :: PLAN::name'
   })
 end
 
@@ -400,4 +368,16 @@ html = style_section + html;
 callback(html);
 
 EOH
+end
+
+coreo_uni_util_notify "advise-ec2-notify-non-current-aws-linux-instance" do
+  action :notify
+  type 'email'
+  allow_empty ${AUDIT_AWS_EC2_TAG_EXAMPLE_ALLOW_EMPTY}
+  send_on "${AUDIT_AWS_EC2_TAG_EXAMPLE_SEND_ON}"
+  payload 'COMPOSITE::coreo_uni_util_jsrunner.ec2-runner-advise-not-latest-aws-linux.return'
+  payload_type "html"
+  endpoint ({
+      :to => '${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT}', :subject => 'Instances not started on latest AWS Linux AMI: PLAN::stack_name :: PLAN::name'
+  })
 end
