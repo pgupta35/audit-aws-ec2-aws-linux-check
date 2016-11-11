@@ -34,7 +34,8 @@ end
 # this resource simply executes the alert that was defined above
 #
 coreo_aws_advisor_ec2 "advise-ec2-samples" do
-  alerts ["ec2-get-all-instances-older-than", "ec2-aws-linux-latest-not"]
+  #alerts ["ec2-get-all-instances-older-than", "ec2-aws-linux-latest-not"]
+  alerts ["ec2-aws-linux-latest-not"]
   action :advise
   regions ${AUDIT_AWS_EC2_TAG_EXAMPLE_REGIONS}
 end
