@@ -34,7 +34,13 @@ end
 # this resource simply executes the alert that was defined above
 #
 coreo_aws_advisor_ec2 "advise-ec2-samples" do
-  alerts ["ec2-get-all-instances-older-than", "ec2-aws-linux-latest-not"]
+  alerts ["ec2-get-all-instances-older-than"]
+  action :advise
+  regions ${AUDIT_AWS_EC2_TAG_EXAMPLE_REGIONS}
+end
+
+coreo_aws_advisor_ec2 "advise-ec2-samples-2" do
+  alerts ["ec2-aws-linux-latest-not"]
   action :advise
   regions ${AUDIT_AWS_EC2_TAG_EXAMPLE_REGIONS}
 end
@@ -299,3 +305,99 @@ coreo_uni_util_notify "advise-ec2-notify-no-tags-older-than-kill-all-script" do
   })
 end
 
+coreo_uni_util_jsrunner "ec2-runner-advise-not-latest-aws-linux" do
+  action :run
+  data_type "html"
+  packages([
+        {
+          :name => "tableify",
+          :version => "1.0.0"
+        }       ])
+  json_input 'COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.report'
+  function <<-EOH
+var tableify = require('tableify');
+var style_section = "\
+<style>body {\
+font-family :arial;\
+padding : 0px;\
+margin : 0px;\
+}\
+\
+table {\
+font-size: 10pt;\
+border-top : black 1px solid;\
+border-right : black 1px solid;\
+/* border-spacing : 10px */\
+border-collapse : collapse;\
+}\
+\
+td, th {\
+text-align : left;\
+vertical-align : top;\
+white-space: nowrap;\
+overflow: hidden;\
+text-overflow: ellipsis;\
+border-left : black 1px solid;\
+border-bottom: black 1px solid;\
+padding-left : 4px;\
+padding-right : 4px;\
+}\
+\
+th {\
+background-color : #aaaaaa;\
+}\
+\
+td.number {\
+color : blue\
+}\
+\
+td.boolean {\
+color : green;\
+font-style : italic;\
+}\
+\
+td.date {\
+color : purple;\
+}\
+\
+td.null:after {\
+color : gray;\
+font-style : italic;\
+content : null;\
+}\
+</style>\
+";
+ret_alerts = {};
+ret_table = "[";
+var BreakException = {};
+num_violations = 0;
+num_instances = 0;
+for (instance_id in json_input) {
+  num_instances++;
+  console.log("examining instance: " + instance_id);
+  num_violations++;
+  raw_alert = json_input[instance_id];
+  region = raw_alert["violations"]["ec2-aws-linux-latest-not"]["region"];
+  aws_console = "https://console.aws.amazon.com/ec2/v2/home?region=" + region + "#Instances:search=" + instance_id + "";
+  // leave off the violating_object to reduce size of the json
+  aws_console_html = "<a href=" + aws_console + ">AWS Console</a>";
+  ami_string = "";
+  raw_alert["violations"]["ec2-aws-linux-latest-not"]["violating_object"] = {};
+  raw_alert["violations"]["ec2-aws-linux-latest-not"]["aws_console"] = aws_console;
+  ret_alerts[instance_id] = raw_alert;
+  ret_table = ret_table + '{"instance id" : "' + instance_id + '", "region" : "' + region + '", "ami" : "' + ami_string + '", "aws link" : "' + aws_console_html + '","aws tags" : "' + inst_tags_string + '"}, ';
+  console.log("      instance is in violation: " + instance_id);
+}
+ret_table = ret_table.replace(/, $/, "");
+ret_table = ret_table + "]";
+ret_obj = JSON.parse(ret_table);
+html = tableify(ret_obj);
+html1 = '<p>Alerts powered by <img src="https://d1qb2nb5cznatu.cloudfront.net/startups/i/701250-e3792035663a30915a0b9ab26293b85b-medium_jpg.jpg?buster=1432673112"></p>';
+html3 = "<p>Number of Instances: " + num_instances + "</p><p>Number in Violation: " + num_violations + "</p>";
+html = html1 + html3 + html;
+// add style
+html = style_section + html;
+callback(html);
+
+EOH
+end
