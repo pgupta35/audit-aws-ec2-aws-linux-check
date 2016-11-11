@@ -283,3 +283,25 @@ coreo_uni_util_notify "advise-ec2-notify-no-tags-older-than-kill-all-script" do
       :to => '${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT}', :subject => 'CloudCoreo ec2 advisor alerts on PLAN::stack_name :: PLAN::name'
   })
 end
+
+#
+coreo_aws_advisor_alert "ec2-aws-linux-latest-not" do
+  action :define
+  service :ec2
+  description "Alerts on EC2 instances that were not launched from the latest AWS Linux AMI."
+  category "TBS"
+  suggested_action "TBS"
+  level "TBS"
+  objectives ["instances"]
+  audit_objects ["reservation_set.instances_set.image_id"]
+  operators ["!="]
+  alert_when ["${AWS_LINUX_AMI}"]
+end
+
+# this resource simply executes the alert that was defined above
+#
+coreo_aws_advisor_ec2 "advise-ec2-aws-linux-latest-not" do
+  alerts ["ec2-aws-linux-latest-not"]
+  action :advise
+  regions ${AUDIT_AWS_EC2_TAG_EXAMPLE_REGIONS}
+end
