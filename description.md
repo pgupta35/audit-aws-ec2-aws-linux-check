@@ -1,1 +1,1 @@
-This repo is designed to work with CloudCoreo. It will monitor RDS against best practices for you and send a report to the email address designated by the config.yaml AUDIT&#95;AWS&#95;RDS&#95;ALERT&#95;RECIPIENT value
+This repo is designed to work with CloudCoreo. This composite is a collection of sample EC2 definitions that have been requested by our customers and should be considered a starting point for building your own composites from.
