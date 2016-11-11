@@ -196,7 +196,7 @@ end
 coreo_uni_util_jsrunner "ec2-runner-advise-no-tags-older-than-kill-all-script" do
   action :run
   data_type "text"
-  json_input 'COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-get-all-instances-older-than.report'
+  json_input 'COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.report'
   function <<-EOH
 required_tags = [
     ${AUDIT_AWS_EC2_TAG_EXAMPLE_EXPECTED_TAGS}
