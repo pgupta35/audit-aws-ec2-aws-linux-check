@@ -37,7 +37,7 @@ coreo_uni_util_jsrunner "ec2-runner-advise-no-tags-older-than" do
           :name => "tableify",
           :version => "1.0.0"
         }       ])
-  json_input 'STACK::coreo_aws_advisor_ec2.advise-ec2-get-all-instances-older-than.report'
+  json_input 'COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-get-all-instances-older-than.report'
   function <<-EOH
 var tableify = require('tableify');
 required_tags = [
@@ -181,7 +181,7 @@ end
 coreo_uni_util_jsrunner "ec2-runner-advise-no-tags-older-than-kill-all-script" do
   action :run
   data_type "text"
-  json_input 'STACK::coreo_aws_advisor_ec2.advise-ec2-get-all-instances-older-than.report'
+  json_input 'COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-get-all-instances-older-than.report'
   function <<-EOH
 required_tags = [
     ${AUDIT_AWS_EC2_TAG_EXAMPLE_EXPECTED_TAGS}
@@ -260,13 +260,13 @@ coreo_uni_util_notify "advise-ec2-notify-no-tags-older-than" do
   allow_empty ${AUDIT_AWS_EC2_TAG_EXAMPLE_ALLOW_EMPTY}
   send_on "${AUDIT_AWS_EC2_TAG_EXAMPLE_SEND_ON}"
   payload '
-  STACK::coreo_uni_util_jsrunner.ec2-runner-advise-no-tags-older-than.return
-  <p>stack name: INSTANCE::stack_name</p>
-  <p>instance name: INSTANCE::name</p>
+  COMPOSITE::coreo_uni_util_jsrunner.ec2-runner-advise-no-tags-older-than.return
+  <p>stack name: PLAN::stack_name</p>
+  <p>instance name: PLAN::name</p>
   '
   payload_type "html"
   endpoint ({
-      :to => '${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT}', :subject => 'CloudCoreo ec2 advisor alerts on INSTANCE::stack_name :: INSTANCE::name'
+      :to => '${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT}', :subject => 'CloudCoreo ec2 advisor alerts on PLAN::stack_name :: PLAN::name'
   })
 end
 
@@ -277,9 +277,9 @@ coreo_uni_util_notify "advise-ec2-notify-no-tags-older-than-kill-all-script" do
   type 'email'
   allow_empty ${AUDIT_AWS_EC2_TAG_EXAMPLE_ALLOW_EMPTY}
   send_on "${AUDIT_AWS_EC2_TAG_EXAMPLE_SEND_ON}"
-  payload 'STACK::coreo_uni_util_jsrunner.ec2-runner-advise-no-tags-older-than-kill-all-script.return'
+  payload 'COMPOSITE::coreo_uni_util_jsrunner.ec2-runner-advise-no-tags-older-than-kill-all-script.return'
   payload_type "text"
   endpoint ({
-      :to => '${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT}', :subject => 'CloudCoreo ec2 advisor alerts on INSTANCE::stack_name :: INSTANCE::name'
+      :to => '${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT}', :subject => 'CloudCoreo ec2 advisor alerts on PLAN::stack_name :: PLAN::name'
   })
 end
