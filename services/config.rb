@@ -403,7 +403,7 @@ ret_table = ret_table + "]";
 ret_obj = JSON.parse(ret_table);
 html = tableify(ret_obj);
 html1 = '<p>Alerts powered by <img src="https://d1qb2nb5cznatu.cloudfront.net/startups/i/701250-e3792035663a30915a0b9ab26293b85b-medium_jpg.jpg?buster=1432673112"></p>';
-html3 = "<p>Instances not started on latest AWS Linux AMI:</p><p>Number in Violation: " + num_violations + "</p>";
+html3 = "<p>Instances not started on latest AWS Linux AMI (${AWS_LINUX_AMI}):</p><p>Number in Violation: " + num_violations + "</p>";
 html = html1 + html3 + html;
 // add style
 html = style_section + html;
