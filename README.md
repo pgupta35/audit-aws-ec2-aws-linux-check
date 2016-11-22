@@ -40,15 +40,20 @@ This repo is designed to work with CloudCoreo. This composite is a collection of
   * description: list of AWS regions to check. Default is all regions
   * default: us-east-1, us-west-1, us-west-2
 
-
-## Optional variables with no default
-
-**None**
+### `REGION`:
+  * description: 
+  * default: PLAN::region
 
 
 ## Optional variables with default
 
 **None**
+
+
+## Optional variables with no default
+
+### `AWS_LINUX_AMI`:
+  * description: the ami id for latest AWS Linux
 
 ## Tags
 1. Audit
