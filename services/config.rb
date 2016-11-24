@@ -45,11 +45,33 @@ coreo_aws_advisor_ec2 "advise-ec2-samples-2" do
   regions ["${REGION}"]
 end
 
-# ################################################################
-# ## finds the instances launched more than 5 minutes ago that do not meet the tags and logic as specified
-# ## in the stack variables - returns a HTML table
-# ################################################################
-#
+coreo_uni_util_jsrunner "tags-to-notifiers-array-ec2-samples" do
+  action :run
+  data_type "json"
+  packages([
+               {
+                   :name => "cloudcoreo-jsrunner-commons",
+                   :version => "1.0.4"
+               }       ])
+  json_input '{ "composite name":"PLAN::stack_name",
+                "plan name":"PLAN::name",
+                "number_of_checks":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.number_checks",
+                "number_of_violations":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.number_violations",
+                "number_violations_ignored":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.number_ignored_violations",
+                "violations": COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.report}'
+  function <<-EOH
+const CloudCoreoJSRunner = require('cloudcoreo-jsrunner-commons');
+const AuditCloudtrail = new CloudCoreoJSRunner(json_input, false, "${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_NO_OWNER_RECIPIENT}", "${AUDIT_AWS_EC2_TAG_EXAMPLE_OWNER_TAG}");
+const notifiers = AuditCloudtrail.getNotifiers();
+callback(notifiers);
+  EOH
+end
+
+coreo_uni_util_notify "advise-cloudtrail-to-tag-values" do
+  action :${AUDIT_AWS_EC2_TAG_EXAMPLE_OWNERS_HTML_REPORT}
+  notifiers 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-ec2-samples.return'
+end
+
 coreo_uni_util_jsrunner "ec2-runner-advise-no-tags-older-than" do
   action :run
   data_type "html"
@@ -194,9 +216,6 @@ for (instance_id in json_input) {
 EOH
 end
 
-# same as first filter, but this one just returns a simple text of a shell script that could
-# directly terminate instances that are missing tags
-#
 coreo_uni_util_jsrunner "ec2-runner-advise-no-tags-older-than-kill-all-script" do
   action :run
   data_type "text"
