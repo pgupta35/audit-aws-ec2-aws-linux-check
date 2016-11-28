@@ -78,74 +78,22 @@ end
 coreo_uni_util_jsrunner "ec2-runner-advise-no-tags-older-than-kill-all-script" do
   action :run
   data_type "text"
-  json_input 'COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.report'
+  packages([
+               {
+                   :name => "cloudcoreo-jsrunner-commons",
+                   :version => "1.0.6"
+               }       ])
+  json_input '{ "composite name":"PLAN::stack_name",
+                "plan name":"PLAN::name",
+                "number_of_checks":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.number_checks",
+                "number_of_violations":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.number_violations",
+                "number_violations_ignored":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.number_ignored_violations",
+                "violations": COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.report}'
   function <<-EOH
-required_tags = [
-    ${AUDIT_AWS_EC2_TAG_EXAMPLE_EXPECTED_TAGS}
-];
-// implement case-insensitive
-required_tags_lower = [];
-for (var i = 0; i < required_tags.length; i++) {
-  required_tags_lower.push(required_tags[i].toLowerCase());
-};
-logic = ${AUDIT_AWS_EC2_TAG_EXAMPLE_TAG_LOGIC};
-if (logic == "") {logic = "and";}
-ret_alerts = {};
-var BreakException = {};
-kill_all_script = "";
-num_violations = 0;
-num_instances = 0;
-
-for (instance_id in json_input) {
-    num_instances++;
-    console.log("examining instance: " + instance_id);
-    tags = json_input[instance_id]["tags"];
-    var tag_names = [];
-    for(var i = 0; i < tags.length; i++) {
-        //console.log ("  has tag: " + tags[i]['key']);
-        // implement case-insensitive
-        inst_tag = tags[i]['key'];
-        inst_tag = inst_tag.toLowerCase();
-        tag_names.push(inst_tag)
-    }
-    num_required = 0;
-    num_present = 0;
-
-    try {
-        for(var i = 0; i < required_tags_lower.length; i++){
-            //console.log("    does it have tag " + required_tags_lower[i] + "?");
-            if(tag_names.indexOf(required_tags_lower[i]) == -1) {
-                //console.log("      it does not.");              
-            } else {
-              num_present++;
-              //console.log("      it does! num_present is now: " + num_present);
-            }
-        }
-        if (logic == "and") {
-          needed = required_tags_lower.length;
-        } else {
-          needed = 1;  
-        }
-        if (num_present >= needed) {
-          console.log("      instance has enough tags to pass. Need: " + needed + " and it has: " + num_present);          
-        } else {
-          num_violations++;
-          kill_cmd = "aws ec2 terminate-instances --instance-ids " + instance_id;
-          kill_all_script = kill_all_script + kill_cmd + "\\n";
-          console.log("      instance is in violation: " + instance_id);
-        
-        }
-        throw BreakException;
-      } catch (e) {
-        if (e !== BreakException) throw e;
-    }
-}
-if (kill_all_script.length > 0) {
-  kill_all_script = "#!/bin/bash\\n\\n# number of instances: " + num_instances + "\\n# number in violation: " + num_violations + "\\n\\n" + kill_all_script;
-} else {
-  kill_all_script = "# number of instances: " + num_instances + "\\n# no instances are in violation\\n\\n";
-}
-callback(kill_all_script)
+const CloudCoreoJSRunner = require('cloudcoreo-jsrunner-commons');
+const AuditCloudtrail = new CloudCoreoJSRunner(json_input, true, "${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_NO_OWNER_RECIPIENT}", "${AUDIT_AWS_EC2_TAG_EXAMPLE_OWNER_TAG}");
+const HTMLKillScripts = AuditCloudtrail.getHTMLKillScripts();
+callback(HTMLKillScripts)
   EOH
 end
 
