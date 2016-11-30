@@ -24,6 +24,11 @@ variables:
     required: true
     type: string
     default: '"and"'
+  AUDIT_AWS_EC2_TAG_EXAMPLE_FULL_JSON_REPORT:
+    description: "Would you like to send the full JSON report? Options - notify / nothing. Default is notify."
+    required: true
+    type: string
+    default: "notify"
   AUDIT_AWS_EC2_TAG_EXAMPLE_REGIONS:
     description: list of AWS regions to check. Default is all regions
     required: true
@@ -32,17 +37,6 @@ variables:
         - us-east-1
         - us-west-1
         - us-west-2
-
-
-#       - ap-south-1
-#       - ap-northeast-1
-#       - ap-northeast-2
-#       - ap-southeast-1
-#       - ap-southeast-2
-#       - eu-central-1
-#       - eu-west-1
-#       - sa-east-1
-
   REGION:
     required: true
     default: PLAN::region
@@ -64,7 +58,24 @@ variables:
         eu-west-1: ami-9398d3e0
         sa-east-1: ami-97831ffb 
     type: case
-
-# AMI's are for:
-#   Amazon Linux AMI 2016.09.0 was released on 2016-09-27.
+  AUDIT_AWS_EC2_TAG_EXAMPLE_ROLLUP_REPORT:
+      description: "Would you like to send a Summary ELB report? Options - notify / nothing. Default is no / nothing."
+      required: true
+      type: string
+      default: "nothing"
+  AUDIT_AWS_EC2_TAG_EXAMPLE_OWNERS_HTML_REPORT:
+      description: notify or nothing
+      required: true
+      type: string
+      default: "nothing"
+  AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_NO_OWNER_RECIPIENT:
+      description: "Enter the email address(es) that will receive notifications for objects with no owner tag (Optional, only if owner tag is enabled)."
+      required: false
+      type: string
+      default:
+  AUDIT_AWS_EC2_TAG_EXAMPLE_OWNER_TAG:
+      description: "Enter an AWS tag whose value is an email address of owner of the ELB object. (Optional)"
+      required: false
+      type: string
+      default: "NOT_A_TAG"
 
