@@ -51,7 +51,7 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-ec2-samples" do
   packages([
                {
                    :name => "cloudcoreo-jsrunner-commons",
-                   :version => "1.0.5"
+                   :version => "1.0.9"
                }       ])
   json_input '{ "composite name":"PLAN::stack_name",
                 "plan name":"PLAN::name",
@@ -61,7 +61,7 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-ec2-samples" do
                 "violations": COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.report}'
   function <<-EOH
 const CloudCoreoJSRunner = require('cloudcoreo-jsrunner-commons');
-const AuditCloudtrail = new CloudCoreoJSRunner(json_input, true, "${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_NO_OWNER_RECIPIENT}", "${AUDIT_AWS_EC2_TAG_EXAMPLE_OWNER_TAG}");
+const AuditCloudtrail = new CloudCoreoJSRunner(json_input, true, "${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_NO_OWNER_RECIPIENT}", "${AUDIT_AWS_EC2_TAG_EXAMPLE_OWNER_TAG}", 'ec2-samples');
 const notifiers = AuditCloudtrail.getNotifiers();
 callback(notifiers);
   EOH
@@ -81,7 +81,7 @@ coreo_uni_util_jsrunner "ec2-runner-advise-no-tags-older-than-kill-all-script" d
   packages([
                {
                    :name => "cloudcoreo-jsrunner-commons",
-                   :version => "1.0.6"
+                   :version => "1.0.9"
                }       ])
   json_input '{ "composite name":"PLAN::stack_name",
                 "plan name":"PLAN::name",
@@ -91,7 +91,7 @@ coreo_uni_util_jsrunner "ec2-runner-advise-no-tags-older-than-kill-all-script" d
                 "violations": COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.report}'
   function <<-EOH
 const CloudCoreoJSRunner = require('cloudcoreo-jsrunner-commons');
-const AuditCloudtrail = new CloudCoreoJSRunner(json_input, true, "${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_NO_OWNER_RECIPIENT}", "${AUDIT_AWS_EC2_TAG_EXAMPLE_OWNER_TAG}");
+const AuditCloudtrail = new CloudCoreoJSRunner(json_input, true, "${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_NO_OWNER_RECIPIENT}", "${AUDIT_AWS_EC2_TAG_EXAMPLE_OWNER_TAG}", 'ec2-samples');
 const HTMLKillScripts = AuditCloudtrail.getHTMLKillScripts();
 callback(HTMLKillScripts)
   EOH
@@ -117,7 +117,7 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
   packages([
                {
                    :name => "cloudcoreo-jsrunner-commons",
-                   :version => "1.0.5"
+                   :version => "1.0.9"
                }       ])
   json_input '{ "composite name":"PLAN::stack_name",
                 "plan name":"PLAN::name",
@@ -127,7 +127,7 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
                 "violations": COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.report}'
   function <<-EOH
 const CloudCoreoJSRunner = require('cloudcoreo-jsrunner-commons');
-const AuditCloudtrail = new CloudCoreoJSRunner(json_input, false, "${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_NO_OWNER_RECIPIENT}", "${AUDIT_AWS_EC2_TAG_EXAMPLE_OWNER_TAG}");
+const AuditCloudtrail = new CloudCoreoJSRunner(json_input, false, "${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_NO_OWNER_RECIPIENT}", "${AUDIT_AWS_EC2_TAG_EXAMPLE_OWNER_TAG}", 'ec2-samples');
 const notifiers = AuditCloudtrail.getNotifiers();
 callback(notifiers);
   EOH
