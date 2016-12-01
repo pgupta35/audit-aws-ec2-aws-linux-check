@@ -19,6 +19,11 @@ variables:
     required: true
     type: string
     default: '"and"'
+  AUDIT_AWS_EC2_SAMPLES_ALERT_TO_KILL_ADVISE:
+    description: ""
+    required: true
+    type: string
+    default: "nothing"
   AUDIT_AWS_EC2_SAMPLES_ALERT_TO_KILL_NOTIF:
     description: ""
     required: true
@@ -29,6 +34,11 @@ variables:
     required: false
     type: string
     default:
+  AUDIT_AWS_EC2_SAMPLES_LATEST_AWS_LINUX_ADVISE:
+    description: ""
+    required: true
+    type: string
+    default: "nothing"
   AUDIT_AWS_EC2_SAMPLES_LATEST_AWS_LINUX_NOTIF:
     description: ""
     required: true

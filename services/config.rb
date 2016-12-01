@@ -35,13 +35,13 @@ end
 #
 coreo_aws_advisor_ec2 "advise-ec2-samples" do
   alerts ["ec2-get-all-instances-older-than"]
-  action :advise
+  action :${AUDIT_AWS_EC2_SAMPLES_ALERT_TO_KILL_ADVISE}
   regions ${AUDIT_AWS_EC2_SAMPLES_REGIONS}
 end
 
 coreo_aws_advisor_ec2 "advise-ec2-samples-2" do
   alerts ["ec2-aws-linux-latest-not"]
-  action :advise
+  action :${AUDIT_AWS_EC2_SAMPLES_LATEST_AWS_LINUX_ADVISE}
   regions ["${REGION}"]
 end
 
