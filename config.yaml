@@ -38,7 +38,7 @@ variables:
     description: ""
     required: true
     type: string
-    default: "nothing"
+    default: "advise"
   AUDIT_AWS_EC2_SAMPLES_LATEST_AWS_LINUX_NOTIF:
     description: ""
     required: true
