@@ -17,8 +17,6 @@ coreo_aws_advisor_alert "ec2-get-all-instances-older-than" do
   alert_when ["5.minutes.ago"]
 end
 
-
-#
 coreo_aws_advisor_alert "ec2-aws-linux-latest-not" do
   action :define
   service :ec2
@@ -38,7 +36,7 @@ end
 coreo_aws_advisor_ec2 "advise-ec2-samples" do
   alerts ["ec2-get-all-instances-older-than"]
   action :advise
-  regions ${AUDIT_AWS_EC2_TAG_EXAMPLE_REGIONS}
+  regions ${AUDIT_AWS_EC2_SAMPLES_REGIONS}
 end
 
 coreo_aws_advisor_ec2 "advise-ec2-samples-2" do
@@ -63,17 +61,15 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-ec2-samples" do
                 "violations": COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.report}'
   function <<-EOH
 const CloudCoreoJSRunner = require('cloudcoreo-jsrunner-commons');
-const AuditCloudtrail = new CloudCoreoJSRunner(json_input, true, "${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT_2}", "${AUDIT_AWS_EC2_TAG_EXAMPLE_OWNER_TAG}", 'ec2-samples');
+const AuditCloudtrail = new CloudCoreoJSRunner(json_input, true, "${AUDIT_AWS_EC2_SAMPLES_ALERT_TO_KILL_RECIPIENT}", "${AUDIT_AWS_EC2_SAMPLES_OWNER_TAG}", 'ec2-samples');
 const notifiers = AuditCloudtrail.getNotifiers();
 callback(notifiers);
   EOH
 end
 
-
-
 # Send ec2-samples for email
 coreo_uni_util_notify "advise-ec2-samples-to-tag-values" do
-  action :${AUDIT_AWS_EC2_TAG_EXAMPLE_OWNERS_HTML_REPORT}
+  action :${AUDIT_AWS_EC2_SAMPLES_ALERT_TO_KILL_NOTIF}
   notifiers 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-ec2-samples.return'
 end
 
@@ -93,23 +89,21 @@ coreo_uni_util_jsrunner "ec2-runner-advise-no-tags-older-than-kill-all-script" d
                 "violations": COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.report}'
   function <<-EOH
 const CloudCoreoJSRunner = require('cloudcoreo-jsrunner-commons');
-const AuditCloudtrail = new CloudCoreoJSRunner(json_input, true, "${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT_2}", "${AUDIT_AWS_EC2_TAG_EXAMPLE_OWNER_TAG}", 'ec2-samples');
+const AuditCloudtrail = new CloudCoreoJSRunner(json_input, true, "${AUDIT_AWS_EC2_SAMPLES_ALERT_RECIPIENT_2}", "${AUDIT_AWS_EC2_SAMPLES_OWNER_TAG}", 'ec2-samples');
 const HTMLKillScripts = AuditCloudtrail.getHTMLKillScripts();
 callback(HTMLKillScripts)
   EOH
 end
 
-
-
 coreo_uni_util_notify "advise-ec2-notify-no-tags-older-than-kill-all-script" do
-  action ${AUDIT_AWS_EC2_SAMPLES_ALERT_TO_KILL_REPORT}
+  action :${AUDIT_AWS_EC2_SAMPLES_ALERT_TO_KILL_NOTIF}
   type 'email'
-  allow_empty ${AUDIT_AWS_EC2_TAG_EXAMPLE_ALLOW_EMPTY}
-  send_on "${AUDIT_AWS_EC2_TAG_EXAMPLE_SEND_ON}"
+  allow_empty ${AUDIT_AWS_EC2_SAMPLES_ALLOW_EMPTY}
+  send_on "${AUDIT_AWS_EC2_SAMPLES_SEND_ON}"
   payload 'COMPOSITE::coreo_uni_util_jsrunner.ec2-runner-advise-no-tags-older-than-kill-all-script.return'
   payload_type "html"
   endpoint ({
-      :to => '${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT_2}', :subject => 'Untagged EC2 Instances kill script: PLAN::stack_name :: PLAN::name'
+      :to => '${AUDIT_AWS_EC2_SAMPLES_ALERT_TO_KILL_RECIPIENT}', :subject => 'Untagged EC2 Instances kill script: PLAN::stack_name :: PLAN::name'
   })
 end
 
@@ -129,7 +123,7 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
                 "violations": COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.report}'
   function <<-EOH
 const CloudCoreoJSRunner = require('cloudcoreo-jsrunner-commons');
-const AuditCloudtrail = new CloudCoreoJSRunner(json_input, false, "${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT_2}", "${AUDIT_AWS_EC2_TAG_EXAMPLE_OWNER_TAG}", 'ec2-samples');
+const AuditCloudtrail = new CloudCoreoJSRunner(json_input, false, "${AUDIT_AWS_EC2_SAMPLES_LATEST_AWS_LINUX_RECIPIENT}", "${AUDIT_AWS_EC2_SAMPLES_OWNER_TAG}", 'ec2-samples');
 const notifiers = AuditCloudtrail.getNotifiers();
 callback(notifiers);
   EOH
@@ -138,25 +132,6 @@ end
 
 ## Send Notifiers
 coreo_uni_util_notify "advise-ec2-notify-non-current-aws-linux-instance-2" do
-  action ${AUDIT_AWS_EC2_SAMPLES_LATEST_AWS_LINUX_REPORT}
+  action :${AUDIT_AWS_EC2_SAMPLES_LATEST_AWS_LINUX_REPORT}
   notifiers 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.return'
-end
-
-
-
-coreo_uni_util_notify "advise-ec2-samples-2-json" do
-  action :${AUDIT_AWS_EC2_TAG_EXAMPLE_FULL_JSON_REPORT}
-  type 'email'
-  allow_empty ${AUDIT_AWS_EC2_TAG_EXAMPLE_ALLOW_EMPTY}
-  send_on '${AUDIT_AWS_EC2_TAG_EXAMPLE_SEND_ON}'
-  payload '{"composite name":"PLAN::stack_name",
-  "plan name":"PLAN::name",
-  "number_of_checks":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_checks",
-  "number_of_violations":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_violations",
-  "number_violations_ignored":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_ignored_violations",
-  "violations": COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.report}'
-  payload_type "json"
-  endpoint ({
-      :to => '${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT}', :subject => 'CloudCoreo ec2-samples-2 advisor alerts on PLAN::stack_name :: PLAN::name'
-  })
 end
