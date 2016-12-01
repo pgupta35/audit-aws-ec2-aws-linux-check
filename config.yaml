@@ -72,7 +72,7 @@ variables:
       default: "notify"
   AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT_2:
       description: "Enter the email address(es) that will receive notifications for objects with no owner tag (Optional, only if owner tag is enabled)."
-      required: false
+      required: true
       type: string
       default:
   AUDIT_AWS_EC2_TAG_EXAMPLE_OWNER_TAG:
