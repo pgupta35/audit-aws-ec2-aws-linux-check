@@ -132,6 +132,6 @@ end
 
 ## Send Notifiers
 coreo_uni_util_notify "advise-ec2-notify-non-current-aws-linux-instance-2" do
-  action :${AUDIT_AWS_EC2_SAMPLES_LATEST_AWS_LINUX_REPORT}
+  action :${AUDIT_AWS_EC2_SAMPLES_LATEST_AWS_LINUX_NOTIF}
   notifiers 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.return'
 end
