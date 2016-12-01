@@ -6,6 +6,7 @@
 coreo_aws_advisor_alert "ec2-get-all-instances-older-than" do
   action :define
   service :ec2
+  display_name "Alert to Kill"
   description "EC2 instance was launched within the last 5 minutes that violates tag policy (does not have the necessary tags)."
   category "Policy"
   suggested_action "Review instance tags and terminate the instance if it does not comply to tagging policy."
@@ -21,6 +22,7 @@ end
 coreo_aws_advisor_alert "ec2-aws-linux-latest-not" do
   action :define
   service :ec2
+  display_name "Not Latest AWS Linux AMI Instances"
   description "Alerts on EC2 instances that were not launched from the latest AWS Linux AMI."
   category "TBS"
   suggested_action "TBS"
@@ -100,7 +102,7 @@ end
 
 
 coreo_uni_util_notify "advise-ec2-notify-no-tags-older-than-kill-all-script" do
-  action :notify
+  action ${AUDIT_AWS_EC2_SAMPLES_ALERT_TO_KILL_REPORT}
   type 'email'
   allow_empty ${AUDIT_AWS_EC2_TAG_EXAMPLE_ALLOW_EMPTY}
   send_on "${AUDIT_AWS_EC2_TAG_EXAMPLE_SEND_ON}"
@@ -136,7 +138,7 @@ end
 
 ## Send Notifiers
 coreo_uni_util_notify "advise-ec2-notify-non-current-aws-linux-instance-2" do
-  action :${AUDIT_AWS_EC2_TAG_EXAMPLE_OWNERS_HTML_REPORT}
+  action ${AUDIT_AWS_EC2_SAMPLES_LATEST_AWS_LINUX_REPORT}
   notifiers 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.return'
 end
 
