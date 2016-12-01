@@ -26,7 +26,7 @@ variables:
     default: "nothing"
   AUDIT_AWS_EC2_SAMPLES_ALERT_TO_KILL_RECIPIENT:
     description: ""
-    required: true
+    required: false
     type: string
     default:
   AUDIT_AWS_EC2_SAMPLES_LATEST_AWS_LINUX_NOTIF:
@@ -36,7 +36,7 @@ variables:
     default: "notify"
   AUDIT_AWS_EC2_SAMPLES_LATEST_AWS_LINUX_RECIPIENT:
     description: ""
-    required: true
+    required: false
     type: string
     default:
   AUDIT_AWS_EC2_SAMPLES_REGIONS:
