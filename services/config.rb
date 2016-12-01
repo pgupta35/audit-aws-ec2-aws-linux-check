@@ -89,7 +89,7 @@ coreo_uni_util_jsrunner "ec2-runner-advise-no-tags-older-than-kill-all-script" d
                 "violations": COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.report}'
   function <<-EOH
 const CloudCoreoJSRunner = require('cloudcoreo-jsrunner-commons');
-const AuditCloudtrail = new CloudCoreoJSRunner(json_input, true, "${AUDIT_AWS_EC2_SAMPLES_ALERT_RECIPIENT_2}", "${AUDIT_AWS_EC2_SAMPLES_OWNER_TAG}", 'ec2-samples');
+const AuditCloudtrail = new CloudCoreoJSRunner(json_input, true, "${AUDIT_AWS_EC2_SAMPLES_ALERT_TO_KILL_RECIPIENT}", "${AUDIT_AWS_EC2_SAMPLES_OWNER_TAG}", 'ec2-samples');
 const HTMLKillScripts = AuditCloudtrail.getHTMLKillScripts();
 callback(HTMLKillScripts)
   EOH
