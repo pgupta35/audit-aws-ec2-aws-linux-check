@@ -11,7 +11,7 @@ variables:
     default: "change"
   AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT:
     description: "this is who the full json report goes to"
-    required: false
+    required: true
     type: string
     default:
   AUDIT_AWS_EC2_LINUX_CHECK_REGIONS:
