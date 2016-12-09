@@ -65,5 +65,5 @@ This repo is designed to work with CloudCoreo. This composite is a collection of
 
 
 ## Icon
-
+![icon](https://raw.githubusercontent.com/CloudCoreo/audit-aws-ec2-aws-linux-check/master/images/icon.png "icon")
 
