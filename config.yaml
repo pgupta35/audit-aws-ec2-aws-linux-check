@@ -1,55 +1,20 @@
 variables:
-  AUDIT_AWS_EC2_SAMPLES_ALLOW_EMPTY:
+  AUDIT_AWS_EC2_LINUX_CHECK_ALLOW_EMPTY:
     description: receive empty reports?
     required: true
     type: string
     default: false
-  AUDIT_AWS_EC2_SAMPLES_SEND_ON:
+  AUDIT_AWS_EC2_LINUX_CHECK_SEND_ON:
     description: always or change
     required: true
     type: string
     default: "change"
-  AUDIT_AWS_EC2_SAMPLES_EXPECTED_TAGS:
-    description: the tag we want to see on instances
-    required: true
-    type: string
-    default: '"EXAMPLE_TAG_1", "EXAMPLE_TAG_2"'
-  AUDIT_AWS_EC2_SAMPLES_TAG_LOGIC:
-    description: '"or" or "and"'
-    required: true
-    type: string
-    default: '"and"'
-  AUDIT_AWS_EC2_SAMPLES_ALERT_TO_KILL_ADVISE:
-    description: ""
-    required: true
-    type: string
-    default: "nothing"
-  AUDIT_AWS_EC2_SAMPLES_ALERT_TO_KILL_NOTIF:
-    description: ""
-    required: true
-    type: string
-    default: "nothing"
-  AUDIT_AWS_EC2_SAMPLES_ALERT_TO_KILL_RECIPIENT:
-    description: ""
+  AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT:
+    description: "this is who the full json report goes to"
     required: false
     type: string
     default:
-  AUDIT_AWS_EC2_SAMPLES_LATEST_AWS_LINUX_ADVISE:
-    description: ""
-    required: true
-    type: string
-    default: "advise"
-  AUDIT_AWS_EC2_SAMPLES_LATEST_AWS_LINUX_NOTIF:
-    description: ""
-    required: true
-    type: string
-    default: "notify"
-  AUDIT_AWS_EC2_SAMPLES_LATEST_AWS_LINUX_RECIPIENT:
-    description: ""
-    required: false
-    type: string
-    default:
-  AUDIT_AWS_EC2_SAMPLES_REGIONS:
+  AUDIT_AWS_EC2_LINUX_CHECK_REGIONS:
     description: list of AWS regions to check. Default is all regions
     required: true
     type: array
@@ -80,7 +45,7 @@ variables:
         eu-west-1: ami-9398d3e0
         sa-east-1: ami-97831ffb 
     type: case
-  AUDIT_AWS_EC2_SAMPLES_OWNER_TAG:
+  AUDIT_AWS_EC2_LINUX_CHECK_OWNER_TAG:
       description: "Enter an AWS tag whose value is an email address of owner of the ELB object. (Optional)"
       required: false
       type: string
