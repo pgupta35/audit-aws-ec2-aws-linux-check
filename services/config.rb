@@ -30,7 +30,7 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
   packages([
                {
                    :name => "cloudcoreo-jsrunner-commons",
-                   :version => "1.1.2"
+                   :version => "1.1.7"
                }       ])
   json_input '{ "composite name":"PLAN::stack_name",
                 "plan name":"PLAN::name",
@@ -39,9 +39,27 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
                 "number_violations_ignored":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_ignored_violations",
                 "violations": COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.report}'
   function <<-EOH
+  
+const JSON = json_input;
+const NO_OWNER_EMAIL = "${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}";
+const OWNER_TAG = "${AUDIT_AWS_EC2_LINUX_CHECK_OWNER_TAG}";
+const AUDIT_NAME = 'ec2-samples';
+const IS_KILL_SCRIPTS_SHOW = false;
+const EC2_LOGIC = ''; // you can choose 'and' or 'or';
+const EXPECTED_TAGS = [];
+
+const VARIABLES = {
+    'NO_OWNER_EMAIL': NO_OWNER_EMAIL,
+    'OWNER_TAG': OWNER_TAG,
+    'AUDIT_NAME': AUDIT_NAME,
+    'IS_KILL_SCRIPTS_SHOW': IS_KILL_SCRIPTS_SHOW,
+    'EC2_LOGIC': EC2_LOGIC,
+    'EXPECTED_TAGS': EXPECTED_TAGS
+};
+
 const CloudCoreoJSRunner = require('cloudcoreo-jsrunner-commons');
-const AuditCloudtrail = new CloudCoreoJSRunner(json_input, false, "${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}", "${AUDIT_AWS_EC2_LINUX_CHECK_OWNER_TAG}", 'ec2-samples');
-const notifiers = AuditCloudtrail.getNotifiers();
+const AuditLinux = new CloudCoreoJSRunner(JSON, VARIABLES);
+const notifiers = AuditLinux.getNotifiers();
 callback(notifiers);
   EOH
 end
