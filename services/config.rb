@@ -26,6 +26,8 @@ end
 
 # the jsrunner will now allow all regions to be specified in the above advisor instead of a single region
 
+# it will also allow the specification of a convention file in the composite to specify violation suppressions
+
 # coreo_uni_util_jsrunner "jsrunner-composite-access" do
 #   action :run
 #   provide_composite_access true
