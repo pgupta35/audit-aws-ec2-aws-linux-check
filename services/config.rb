@@ -24,6 +24,29 @@ coreo_aws_advisor_ec2 "advise-ec2-samples-2" do
   regions ["${REGION}"]
 end
 
+# the jsrunner will now allow all regions to be specified in the above advisor instead of a single region
+
+# coreo_uni_util_jsrunner "jsrunner-composite-access" do
+#   action :run
+#   provide_composite_access true
+#   json_input '{ "hi always": [ {"this": "resource"}, {"always": "runs"} ] }'
+#   function <<-EOH
+# var fs = require('fs');
+
+# var path = '.';
+# console.log('XXXXX listing dir now XXXXXX');
+# fs.readdir(path, function(err, items) {
+#     console.log(items);
+
+#     for (var i=0; i<items.length; i++) {
+#         console.log(items[i]);
+#     }
+#     callback(json_input["hi always"]);
+# });
+
+#   EOH
+# end
+
 coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
   action :run
   data_type "json"
