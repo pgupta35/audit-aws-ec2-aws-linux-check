@@ -14,14 +14,14 @@ coreo_aws_advisor_alert "ec2-aws-linux-latest-not" do
   level "Informational"
   objectives ["instances"]
   audit_objects ["reservation_set.instances_set.image_id"]
-  operators ["!="]
-  alert_when ["${AWS_LINUX_AMI}"]
+  operators ["=~"]
+  alert_when [//]
 end
 
 coreo_aws_advisor_ec2 "advise-ec2-samples-2" do
   alerts ["ec2-aws-linux-latest-not"]
   action :advise
-  regions ["${REGION}"]
+  regions ${AUDIT_AWS_EC2_LINUX_CHECK_REGIONS}
 end
 
 # the jsrunner will now allow all regions to be specified in the above advisor instead of a single region
@@ -31,21 +31,36 @@ end
 coreo_uni_util_jsrunner "jsrunner-composite-access" do
   action :run
   provide_composite_access true
-  json_input '{ "hi always": [ {"this": "resource"}, {"always": "runs"} ] }'
+  json_input 'COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.report'
+  packages([
+               {
+                   :name => "js-yaml",
+                   :version => "3.7.0"
+               }       ])
   function <<-EOH
-var fs = require('fs');
+    var fs = require('fs');
+    var yaml = require('js-yaml');
 
-var path = '.';
-console.log('XXXXX listing dir now XXXXXX');
-fs.readdir(path, function(err, items) {
-    console.log(items);
-
-    for (var i=0; i<items.length; i++) {
-        console.log(items[i]);
+// Get document, or throw exception on error
+    try {
+        var properties = yaml.safeLoad(fs.readFileSync('./config.yaml', 'utf8'));
+        console.log(properties);
+    } catch (e) {
+        console.log(e);
     }
+
+    var result = {};
+    for (var key in json_input['violations']) {
+    }
+
+    var cases = properties["variables"]["AWS_LINUX_AMI"]["cases"];
+    for (var key in cases) {
+        value = cases[key];
+        console.log(value);
+    }
+
     callback(json_input["hi always"]);
 });
-
   EOH
 end
 
