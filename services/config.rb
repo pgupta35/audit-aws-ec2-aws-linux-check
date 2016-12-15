@@ -28,7 +28,7 @@ end
 
 # it will also allow the specification of a convention file in the composite to specify violation suppressions
 
-coreo_uni_util_jsrunner "jsrunner-composite-access" do
+coreo_uni_util_jsrunner "jsrunner-get-not-aws-linux-ami-latest" do
   action :run
   provide_composite_access true
   json_input 'COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.report'
@@ -50,18 +50,31 @@ coreo_uni_util_jsrunner "jsrunner-composite-access" do
     }
 
     var result = {};
-    for (var key in json_input['violations']) {
+    for (var inputKey in json_input) {
+        var thisKey = inputKey;
+        var ami_id = json_input[thisKey]["violations"]["ec2-aws-linux-latest-not"]["violating_object"]["0"]["object"]["image_id"];
+
+        var cases = properties["variables"]["AWS_LINUX_AMI"]["cases"];
+        var is_violation = true;
+        for (var key in cases) {
+            value = cases[key];
+            console.log(value);
+            if (ami_id === value) {
+                console.log("got a match - this is not a violation");
+                is_violation = false;
+            }
+        }
+        if (is_violation === true) {
+            console.log("no match - this is a violation so copy to result structure");
+            result[thisKey] = json_input[thisKey];
+        }
     }
 
-    var cases = properties["variables"]["AWS_LINUX_AMI"]["cases"];
-    for (var key in cases) {
-        value = cases[key];
-        console.log(value);
-    }
+    var rtn = result;
 
-    callback(json_input["hi always"]);
-});
-  EOH
+    callback(result);
+
+EOH
 end
 
 coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
@@ -77,7 +90,7 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
                 "number_of_checks":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_checks",
                 "number_of_violations":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_violations",
                 "number_violations_ignored":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_ignored_violations",
-                "violations": COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.report}'
+                "violations": COMPOSITE::coreo_aws_advisor_ec2.jsrunner-get-not-aws-linux-ami-latest.report}'
   function <<-EOH
   
 const JSON = json_input;
