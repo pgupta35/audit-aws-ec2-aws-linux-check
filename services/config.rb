@@ -92,8 +92,8 @@ coreo_uni_util_jsrunner "jsrunner-process-suppressions" do
 
 // Get document, or throw exception on error
     try {
-        var properties = yaml.safeLoad(fs.readFileSync('./suppressions.yaml', 'utf8'));
-        console.log(properties);
+        var suppressions = yaml.safeLoad(fs.readFileSync('./suppressions.yaml', 'utf8'));
+        console.log(suppressions);
     } catch (e) {
         console.log(e);
     }
@@ -101,28 +101,26 @@ coreo_uni_util_jsrunner "jsrunner-process-suppressions" do
     var result = {};
     for (var inputKey in json_input) {
         var thisKey = inputKey;
-//        var ami_id = json_input[thisKey]["violations"]["ec2-aws-linux-latest-not"]["violating_object"]["0"]["object"]["image_id"];
-//
-//        var cases = properties["variables"]["AWS_LINUX_AMI"]["cases"];
-//        var is_violation = true;
-//        for (var key in cases) {
-//            value = cases[key];
-//            console.log(value);
-//            if (ami_id === value) {
-//                console.log("got a match - this is not a violation");
-//                is_violation = false;
-//            }
-//        }
-//        if (is_violation === true) {
-//            console.log("no match - this is a violation so copy to result structure");
-//            result[thisKey] = json_input[thisKey];
-//        }
+        var inst_id = inputKey;
+        is_violation = true;
+        for (var suppression in suppressions["suppressions"]["ec2-aws-linux-latest-not"]) {
+            value = suppressions["suppressions"]["ec2-aws-linux-latest-not"][suppression];
+            if (value === inst_id) {
+                console.log("got a match - this violation is suppressed");
+                is_violation = false;
+            }
 
+        }
+        if (is_violation === true) {
+            console.log("no match - this is a violation so copy to result structure");
+            result[thisKey] = json_input[thisKey];
+        }
     }
 
     var rtn = result;
 
     callback(result);
+
 
 EOH
 end
