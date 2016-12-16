@@ -1,0 +1,7 @@
+suppressions:
+  AUDIT_SUPPRESSIONS:
+    description: 
+    type: array
+    default:
+        - i-abc
+        - i-def

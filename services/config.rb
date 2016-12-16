@@ -77,6 +77,56 @@ coreo_uni_util_jsrunner "jsrunner-get-not-aws-linux-ami-latest" do
 EOH
 end
 
+coreo_uni_util_jsrunner "jsrunner-process-suppressions" do
+  action :run
+  provide_composite_access true
+  json_input 'COMPOSITE::coreo_uni_util_jsrunner.jsrunner-get-not-aws-linux-ami-latest.return'
+  packages([
+               {
+                   :name => "js-yaml",
+                   :version => "3.7.0"
+               }       ])
+  function <<-EOH
+    var fs = require('fs');
+    var yaml = require('js-yaml');
+
+// Get document, or throw exception on error
+    try {
+        var properties = yaml.safeLoad(fs.readFileSync('./suppressions.yaml', 'utf8'));
+        console.log(properties);
+    } catch (e) {
+        console.log(e);
+    }
+
+    var result = {};
+    for (var inputKey in json_input) {
+        var thisKey = inputKey;
+//        var ami_id = json_input[thisKey]["violations"]["ec2-aws-linux-latest-not"]["violating_object"]["0"]["object"]["image_id"];
+//
+//        var cases = properties["variables"]["AWS_LINUX_AMI"]["cases"];
+//        var is_violation = true;
+//        for (var key in cases) {
+//            value = cases[key];
+//            console.log(value);
+//            if (ami_id === value) {
+//                console.log("got a match - this is not a violation");
+//                is_violation = false;
+//            }
+//        }
+//        if (is_violation === true) {
+//            console.log("no match - this is a violation so copy to result structure");
+//            result[thisKey] = json_input[thisKey];
+//        }
+
+    }
+
+    var rtn = result;
+
+    callback(result);
+
+EOH
+end
+
 coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
   action :run
   data_type "json"
@@ -90,7 +140,7 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
                 "number_of_checks":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_checks",
                 "number_of_violations":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_violations",
                 "number_violations_ignored":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_ignored_violations",
-                "violations": COMPOSITE::coreo_uni_util_jsrunner.jsrunner-get-not-aws-linux-ami-latest.return}'
+                "violations": COMPOSITE::coreo_uni_util_jsrunner.jsrunner-process-suppressions.return}'
   function <<-EOH
   
 const JSON = json_input;
