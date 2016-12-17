@@ -24,10 +24,6 @@ variables:
         - us-west-1
         - us-west-2
         - eu-west-1
-  REGION:
-    required: true
-    default: PLAN::region
-    type: string
   AWS_LINUX_AMI:
     description: the ami id for latest AWS Linux
     switch: "PLAN::region"
