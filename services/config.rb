@@ -3,112 +3,126 @@
 # this set will be post-processed by the jsrunner below to examine the tags - nothing is directly
 # alerted on from this definition
 #
-coreo_aws_advisor_alert "ec2-get-all-instances-older-than" do
-  action :define
-  service :ec2
-  description "EC2 instance was launched within the last 5 minutes that violates tag policy (does not have the necessary tags)."
-  category "Policy"
-  suggested_action "Review instance tags and terminate the instance if it does not comply to tagging policy."
-  level "Warning"
-  objectives ["instances"]
-  audit_objects ["reservation_set.instances_set.launch_time"]
-  operators ["<"]
-  alert_when ["5.minutes.ago"]
-end
 
-
-#
 coreo_aws_advisor_alert "ec2-aws-linux-latest-not" do
   action :define
   service :ec2
+  display_name "Not Latest AWS Linux AMI Instances"
   description "Alerts on EC2 instances that were not launched from the latest AWS Linux AMI."
   category "TBS"
   suggested_action "TBS"
   level "Informational"
   objectives ["instances"]
   audit_objects ["reservation_set.instances_set.image_id"]
-  operators ["!="]
-  alert_when ["${AWS_LINUX_AMI}"]
-end
-
-# this resource simply executes the alert that was defined above
-#
-coreo_aws_advisor_ec2 "advise-ec2-samples" do
-  alerts ["ec2-get-all-instances-older-than"]
-  action :advise
-  regions ${AUDIT_AWS_EC2_TAG_EXAMPLE_REGIONS}
+  operators ["=~"]
+  alert_when [//]
 end
 
 coreo_aws_advisor_ec2 "advise-ec2-samples-2" do
   alerts ["ec2-aws-linux-latest-not"]
   action :advise
-  regions ["${REGION}"]
+  regions ${AUDIT_AWS_EC2_LINUX_CHECK_REGIONS}
 end
 
-coreo_uni_util_jsrunner "tags-to-notifiers-array-ec2-samples" do
+# the jsrunner will now allow all regions to be specified in the above advisor instead of a single region
+
+# it will also allow the specification of a convention file in the composite to specify violation suppressions
+
+coreo_uni_util_jsrunner "jsrunner-get-not-aws-linux-ami-latest" do
   action :run
-  data_type "json"
+  provide_composite_access true
+  json_input 'COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.report'
   packages([
                {
-                   :name => "cloudcoreo-jsrunner-commons",
-                   :version => "1.1.1"
+                   :name => "js-yaml",
+                   :version => "3.7.0"
                }       ])
-  json_input '{ "composite name":"PLAN::stack_name",
-                "plan name":"PLAN::name",
-                "number_of_checks":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.number_checks",
-                "number_of_violations":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.number_violations",
-                "number_violations_ignored":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.number_ignored_violations",
-                "violations": COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.report}'
   function <<-EOH
-const CloudCoreoJSRunner = require('cloudcoreo-jsrunner-commons');
-const AuditCloudtrail = new CloudCoreoJSRunner(json_input, true, "${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_NO_OWNER_RECIPIENT}", "${AUDIT_AWS_EC2_TAG_EXAMPLE_OWNER_TAG}", 'ec2-samples');
-const notifiers = AuditCloudtrail.getNotifiers();
-callback(notifiers);
-  EOH
+    var fs = require('fs');
+    var yaml = require('js-yaml');
+
+// Get document, or throw exception on error
+    try {
+        var properties = yaml.safeLoad(fs.readFileSync('./config.yaml', 'utf8'));
+        console.log(properties);
+    } catch (e) {
+        console.log(e);
+    }
+
+    var result = {};
+    for (var inputKey in json_input) {
+        var thisKey = inputKey;
+        var ami_id = json_input[thisKey]["violations"]["ec2-aws-linux-latest-not"]["violating_object"]["0"]["object"]["image_id"];
+
+        var cases = properties["variables"]["AWS_LINUX_AMI"]["cases"];
+        var is_violation = true;
+        for (var key in cases) {
+            value = cases[key];
+            console.log(value);
+            if (ami_id === value) {
+                console.log("got a match - this is not a violation");
+                is_violation = false;
+            }
+        }
+        if (is_violation === true) {
+            console.log("no match - this is a violation so copy to result structure");
+            result[thisKey] = json_input[thisKey];
+        }
+    }
+
+    var rtn = result;
+
+    callback(result);
+
+EOH
 end
 
-
-
-# Send ec2-samples for email
-coreo_uni_util_notify "advise-ec2-samples-to-tag-values" do
-  action :${AUDIT_AWS_EC2_TAG_EXAMPLE_OWNERS_HTML_REPORT}
-  notifiers 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-ec2-samples.return'
-end
-
-coreo_uni_util_jsrunner "ec2-runner-advise-no-tags-older-than-kill-all-script" do
+coreo_uni_util_jsrunner "jsrunner-process-suppressions" do
   action :run
-  data_type "text"
+  provide_composite_access true
+  json_input 'COMPOSITE::coreo_uni_util_jsrunner.jsrunner-get-not-aws-linux-ami-latest.return'
   packages([
                {
-                   :name => "cloudcoreo-jsrunner-commons",
-                   :version => "1.1.1"
+                   :name => "js-yaml",
+                   :version => "3.7.0"
                }       ])
-  json_input '{ "composite name":"PLAN::stack_name",
-                "plan name":"PLAN::name",
-                "number_of_checks":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.number_checks",
-                "number_of_violations":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.number_violations",
-                "number_violations_ignored":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.number_ignored_violations",
-                "violations": COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.report}'
   function <<-EOH
-const CloudCoreoJSRunner = require('cloudcoreo-jsrunner-commons');
-const AuditCloudtrail = new CloudCoreoJSRunner(json_input, true, "${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_NO_OWNER_RECIPIENT}", "${AUDIT_AWS_EC2_TAG_EXAMPLE_OWNER_TAG}", 'ec2-samples');
-const HTMLKillScripts = AuditCloudtrail.getHTMLKillScripts();
-callback(HTMLKillScripts)
-  EOH
-end
+    var fs = require('fs');
+    var yaml = require('js-yaml');
+
+// Get document, or throw exception on error
+    try {
+        var suppressions = yaml.safeLoad(fs.readFileSync('./suppressions.yaml', 'utf8'));
+        console.log(suppressions);
+    } catch (e) {
+        console.log(e);
+    }
+
+    var result = {};
+    for (var inputKey in json_input) {
+        var thisKey = inputKey;
+        var inst_id = inputKey;
+        is_violation = true;
+        for (var suppression in suppressions["suppressions"]["ec2-aws-linux-latest-not"]) {
+            value = suppressions["suppressions"]["ec2-aws-linux-latest-not"][suppression];
+            if (value === inst_id) {
+                console.log("got a match - this violation is suppressed");
+                is_violation = false;
+            }
+
+        }
+        if (is_violation === true) {
+            console.log("no match - this is a violation so copy to result structure");
+            result[thisKey] = json_input[thisKey];
+        }
+    }
+
+    var rtn = result;
+
+    callback(result);
 
 
-
-coreo_uni_util_notify "advise-ec2-notify-no-tags-older-than-kill-all-script" do
-  action :notify
-  type 'email'
-  allow_empty ${AUDIT_AWS_EC2_TAG_EXAMPLE_ALLOW_EMPTY}
-  send_on "${AUDIT_AWS_EC2_TAG_EXAMPLE_SEND_ON}"
-  payload 'COMPOSITE::coreo_uni_util_jsrunner.ec2-runner-advise-no-tags-older-than-kill-all-script.return'
-  payload_type "html"
-  endpoint ({
-      :to => '${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT}', :subject => 'Untagged EC2 Instances kill script: PLAN::stack_name :: PLAN::name'
-  })
+EOH
 end
 
 coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
@@ -117,18 +131,36 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
   packages([
                {
                    :name => "cloudcoreo-jsrunner-commons",
-                   :version => "1.1.1"
+                   :version => "1.1.7"
                }       ])
   json_input '{ "composite name":"PLAN::stack_name",
                 "plan name":"PLAN::name",
                 "number_of_checks":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_checks",
                 "number_of_violations":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_violations",
                 "number_violations_ignored":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_ignored_violations",
-                "violations": COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.report}'
+                "violations": COMPOSITE::coreo_uni_util_jsrunner.jsrunner-process-suppressions.return}'
   function <<-EOH
+  
+const JSON = json_input;
+const NO_OWNER_EMAIL = "${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}";
+const OWNER_TAG = "${AUDIT_AWS_EC2_LINUX_CHECK_OWNER_TAG}";
+const AUDIT_NAME = 'ec2-samples';
+const IS_KILL_SCRIPTS_SHOW = false;
+const EC2_LOGIC = ''; // you can choose 'and' or 'or';
+const EXPECTED_TAGS = [];
+
+const VARIABLES = {
+    'NO_OWNER_EMAIL': NO_OWNER_EMAIL,
+    'OWNER_TAG': OWNER_TAG,
+    'AUDIT_NAME': AUDIT_NAME,
+    'IS_KILL_SCRIPTS_SHOW': IS_KILL_SCRIPTS_SHOW,
+    'EC2_LOGIC': EC2_LOGIC,
+    'EXPECTED_TAGS': EXPECTED_TAGS
+};
+
 const CloudCoreoJSRunner = require('cloudcoreo-jsrunner-commons');
-const AuditCloudtrail = new CloudCoreoJSRunner(json_input, false, "${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_NO_OWNER_RECIPIENT}", "${AUDIT_AWS_EC2_TAG_EXAMPLE_OWNER_TAG}", 'ec2-samples');
-const notifiers = AuditCloudtrail.getNotifiers();
+const AuditLinux = new CloudCoreoJSRunner(JSON, VARIABLES);
+const notifiers = AuditLinux.getNotifiers();
 callback(notifiers);
   EOH
 end
@@ -136,25 +168,6 @@ end
 
 ## Send Notifiers
 coreo_uni_util_notify "advise-ec2-notify-non-current-aws-linux-instance-2" do
-  action :${AUDIT_AWS_EC2_TAG_EXAMPLE_OWNERS_HTML_REPORT}
+  action :notify
   notifiers 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.return'
-end
-
-
-
-coreo_uni_util_notify "advise-ec2-samples-2-json" do
-  action :${AUDIT_AWS_EC2_TAG_EXAMPLE_FULL_JSON_REPORT}
-  type 'email'
-  allow_empty ${AUDIT_AWS_EC2_TAG_EXAMPLE_ALLOW_EMPTY}
-  send_on 'always'
-  payload '{"composite name":"PLAN::stack_name",
-  "plan name":"PLAN::name",
-  "number_of_checks":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_checks",
-  "number_of_violations":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_violations",
-  "number_violations_ignored":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_ignored_violations",
-  "violations": COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples.report}'
-  payload_type "json"
-  endpoint ({
-      :to => '${AUDIT_AWS_EC2_TAG_EXAMPLE_ALERT_RECIPIENT}', :subject => 'CloudCoreo ec2-samples-2 advisor alerts on PLAN::stack_name :: PLAN::name'
-  })
 end
