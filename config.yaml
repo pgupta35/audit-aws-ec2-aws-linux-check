@@ -50,7 +50,7 @@ variables:
       description: notify or nothing
       required: true
       type: string
-      default: "nothing"
+      default: "notify"
   AUDIT_AWS_EC2_LINUX_CHECK_OWNER_TAG:
       description: "Enter an AWS tag whose value is an email address of owner of the ELB object. (Optional)"
       required: false
