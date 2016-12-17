@@ -18,13 +18,11 @@ coreo_aws_advisor_alert "ec2-aws-linux-latest-not" do
   alert_when [//]
 end
 
-# this is the full JSON notifier
-#
-# coreo_aws_advisor_ec2 "advise-ec2-samples-2" do
-#   alerts ["ec2-aws-linux-latest-not"]
-#   action :advise
-#   regions ${AUDIT_AWS_EC2_LINUX_CHECK_REGIONS}
-# end
+coreo_aws_advisor_ec2 "advise-ec2-samples-2" do
+  alerts ["ec2-aws-linux-latest-not"]
+  action :advise
+  regions ${AUDIT_AWS_EC2_LINUX_CHECK_REGIONS}
+end
 
 # the jsrunner will now allow all regions to be specified in the above advisor instead of a single region
 
