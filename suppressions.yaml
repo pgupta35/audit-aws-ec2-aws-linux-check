@@ -1,0 +1,5 @@
+suppressions:
+  ec2-aws-linux-latest-not:
+    - i-0e517dc16a8f7c60e
+    - i-02a6f204a3c8dcb91
+

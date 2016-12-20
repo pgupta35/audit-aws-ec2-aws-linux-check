@@ -1,3 +1,6 @@
 [submodule "stack-servers-base/extends"]
 	path = stack-servers-base/extends
 	url = git@github.com:/CloudCoreo/servers-base.git
+[submodule "extends"]
+	path = extends
+	url = git@github.com:CloudCoreo/servers-base.git

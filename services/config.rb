@@ -14,40 +14,116 @@ coreo_aws_advisor_alert "ec2-aws-linux-latest-not" do
   level "Informational"
   objectives ["instances"]
   audit_objects ["reservation_set.instances_set.image_id"]
-  operators ["!="]
-  alert_when ["${AWS_LINUX_AMI}"]
+  operators ["=~"]
+  alert_when [//]
 end
 
 coreo_aws_advisor_ec2 "advise-ec2-samples-2" do
   alerts ["ec2-aws-linux-latest-not"]
   action :advise
-  regions ["${REGION}"]
+  regions ${AUDIT_AWS_EC2_LINUX_CHECK_REGIONS}
 end
 
 # the jsrunner will now allow all regions to be specified in the above advisor instead of a single region
 
 # it will also allow the specification of a convention file in the composite to specify violation suppressions
 
-# coreo_uni_util_jsrunner "jsrunner-composite-access" do
-#   action :run
-#   provide_composite_access true
-#   json_input '{ "hi always": [ {"this": "resource"}, {"always": "runs"} ] }'
-#   function <<-EOH
-# var fs = require('fs');
+coreo_uni_util_jsrunner "jsrunner-get-not-aws-linux-ami-latest" do
+  action :run
+  provide_composite_access true
+  json_input 'COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.report'
+  packages([
+               {
+                   :name => "js-yaml",
+                   :version => "3.7.0"
+               }       ])
+  function <<-EOH
+    var fs = require('fs');
+    var yaml = require('js-yaml');
 
-# var path = '.';
-# console.log('XXXXX listing dir now XXXXXX');
-# fs.readdir(path, function(err, items) {
-#     console.log(items);
+// Get document, or throw exception on error
+    try {
+        var properties = yaml.safeLoad(fs.readFileSync('./config.yaml', 'utf8'));
+        console.log(properties);
+    } catch (e) {
+        console.log(e);
+    }
 
-#     for (var i=0; i<items.length; i++) {
-#         console.log(items[i]);
-#     }
-#     callback(json_input["hi always"]);
-# });
+    var result = {};
+    for (var inputKey in json_input) {
+        var thisKey = inputKey;
+        var ami_id = json_input[thisKey]["violations"]["ec2-aws-linux-latest-not"]["violating_object"]["0"]["object"]["image_id"];
 
-#   EOH
-# end
+        var cases = properties["variables"]["AWS_LINUX_AMI"]["cases"];
+        var is_violation = true;
+        for (var key in cases) {
+            value = cases[key];
+            console.log(value);
+            if (ami_id === value) {
+                console.log("got a match - this is not a violation");
+                is_violation = false;
+            }
+        }
+        if (is_violation === true) {
+            console.log("no match - this is a violation so copy to result structure");
+            result[thisKey] = json_input[thisKey];
+        }
+    }
+
+    var rtn = result;
+
+    callback(result);
+
+EOH
+end
+
+coreo_uni_util_jsrunner "jsrunner-process-suppressions" do
+  action :run
+  provide_composite_access true
+  json_input 'COMPOSITE::coreo_uni_util_jsrunner.jsrunner-get-not-aws-linux-ami-latest.return'
+  packages([
+               {
+                   :name => "js-yaml",
+                   :version => "3.7.0"
+               }       ])
+  function <<-EOH
+    var fs = require('fs');
+    var yaml = require('js-yaml');
+
+// Get document, or throw exception on error
+    try {
+        var suppressions = yaml.safeLoad(fs.readFileSync('./suppressions.yaml', 'utf8'));
+        console.log(suppressions);
+    } catch (e) {
+        console.log(e);
+    }
+
+    var result = {};
+    for (var inputKey in json_input) {
+        var thisKey = inputKey;
+        var inst_id = inputKey;
+        is_violation = true;
+        for (var suppression in suppressions["suppressions"]["ec2-aws-linux-latest-not"]) {
+            value = suppressions["suppressions"]["ec2-aws-linux-latest-not"][suppression];
+            if (value === inst_id) {
+                console.log("got a match - this violation is suppressed");
+                is_violation = false;
+            }
+
+        }
+        if (is_violation === true) {
+            console.log("no match - this is a violation so copy to result structure");
+            result[thisKey] = json_input[thisKey];
+        }
+    }
+
+    var rtn = result;
+
+    callback(result);
+
+
+EOH
+end
 
 coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
   action :run
@@ -62,7 +138,7 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
                 "number_of_checks":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_checks",
                 "number_of_violations":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_violations",
                 "number_violations_ignored":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_ignored_violations",
-                "violations": COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.report}'
+                "violations": COMPOSITE::coreo_uni_util_jsrunner.jsrunner-process-suppressions.return}'
   function <<-EOH
   
 const JSON = json_input;
