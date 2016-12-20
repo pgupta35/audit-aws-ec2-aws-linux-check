@@ -66,10 +66,10 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
   function <<-EOH
   
 const JSON = json_input;
-const NO_OWNER_EMAIL = "${AUDIT_AWS_EC2_ALERT_RECIPIENT_2}";
-const OWNER_TAG = "${AUDIT_AWS_EC2_OWNER_TAG}";
-const ALLOW_EMPTY = "${AUDIT_AWS_EC2_ALLOW_EMPTY}";
-const SEND_ON = "${AUDIT_AWS_EC2_SEND_ON}";
+const NO_OWNER_EMAIL = "${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}";
+const OWNER_TAG = "${AUDIT_AWS_EC2_LINUX_CHECK_OWNER_TAG}";
+const ALLOW_EMPTY = "${AUDIT_AWS_EC2_LINUX_CHECK_ALLOW_EMPTY}";
+const SEND_ON = "${AUDIT_AWS_EC2_LINUX_CHECK_SEND_ON}";
 const AUDIT_NAME = 'ec2-samples';
 
 const ARE_KILL_SCRIPTS_SHOWN = false;
@@ -114,10 +114,6 @@ const VARIABLES = {
     ALLOW_EMPTY,
     SEND_ON
 };
-
-const CloudCoreoJSRunner = require('cloudcoreo-jsrunner-commons');
-const AuditLinux = new CloudCoreoJSRunner(JSON, VARIABLES);
-const notifiers = AuditLinux.getNotifiers();
 callback(notifiers);
   EOH
 end
