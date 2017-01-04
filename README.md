@@ -32,9 +32,13 @@ This repo is designed to work with CloudCoreo. This composite is a collection of
   * description: list of AWS regions to check. Default is all regions
   * default: us-east-1, us-east-2, us-west-1, us-west-2, eu-west-1
 
-### `REGION`:
-  * description: 
-  * default: PLAN::region
+### `AUDIT_AWS_EC2_LINUX_CHECK_ROLLUP_REPORT`:
+  * description: Would you like to send a Summary ELB report? Options - notify / nothing. Default is no / nothing.
+  * default: nothing
+
+### `AUDIT_AWS_EC2_LINUX_CHECK_HTML_REPORT`:
+  * description: notify or nothing
+  * default: notify
 
 
 ## Optional variables with default
