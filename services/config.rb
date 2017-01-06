@@ -197,6 +197,12 @@ callback(notifiers);
   EOH
 end
 
+coreo_uni_util_variables "update-advisor-output" do
+  action :set
+  variables([
+       {'COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.report' => 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.return'}
+      ])
+end
 
 ## Send Notifiers
 coreo_uni_util_notify "advise-ec2-notify-non-current-aws-linux-instance-2" do
