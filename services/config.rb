@@ -131,31 +131,63 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
   packages([
                {
                    :name => "cloudcoreo-jsrunner-commons",
-                   :version => "1.1.7"
+                   :version => "1.3.9"
                }       ])
   json_input '{ "composite name":"PLAN::stack_name",
                 "plan name":"PLAN::name",
-                "number_of_checks":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_checks",
-                "number_of_violations":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_violations",
-                "number_violations_ignored":"COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.number_ignored_violations",
                 "violations": COMPOSITE::coreo_uni_util_jsrunner.jsrunner-process-suppressions.return}'
   function <<-EOH
   
 const JSON = json_input;
 const NO_OWNER_EMAIL = "${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}";
 const OWNER_TAG = "${AUDIT_AWS_EC2_LINUX_CHECK_OWNER_TAG}";
+const ALLOW_EMPTY = "${AUDIT_AWS_EC2_LINUX_CHECK_ALLOW_EMPTY}"; // true or false
+const SEND_ON = "${AUDIT_AWS_EC2_LINUX_CHECK_SEND_ON}"; // always or change
 const AUDIT_NAME = 'ec2-samples';
-const IS_KILL_SCRIPTS_SHOW = false;
-const EC2_LOGIC = ''; // you can choose 'and' or 'or';
-const EXPECTED_TAGS = [];
+
+
+const ARE_KILL_SCRIPTS_SHOWN = false;
+const EC2_LOGIC = "or"; // you can choose 'and' or 'or';
+const EXPECTED_TAGS = ['EXAMPLE_TAG_2', 'example_1'];
+
+const WHAT_NEED_TO_SHOWN = {
+    OBJECT_ID: {
+        headerName: 'AWS Object ID',
+        isShown: true,
+    },
+    REGION: {
+        headerName: 'Region',
+        isShown: true,
+    },
+    AWS_CONSOLE: {
+        headerName: 'AWS Console',
+        isShown: true,
+    },
+    TAGS: {
+        headerName: 'Tags',
+        isShown: true,
+    },
+    AMI: {
+        headerName: 'AMI',
+        isShown: true,
+    },
+    KILL_SCRIPTS: {
+        headerName: 'Kill Cmd',
+        isShown: false,
+    }
+};
+
 
 const VARIABLES = {
-    'NO_OWNER_EMAIL': NO_OWNER_EMAIL,
-    'OWNER_TAG': OWNER_TAG,
-    'AUDIT_NAME': AUDIT_NAME,
-    'IS_KILL_SCRIPTS_SHOW': IS_KILL_SCRIPTS_SHOW,
-    'EC2_LOGIC': EC2_LOGIC,
-    'EXPECTED_TAGS': EXPECTED_TAGS
+    NO_OWNER_EMAIL,
+    OWNER_TAG,
+    AUDIT_NAME,
+    ARE_KILL_SCRIPTS_SHOWN,
+    EC2_LOGIC,
+    EXPECTED_TAGS,
+    WHAT_NEED_TO_SHOWN,
+    ALLOW_EMPTY,
+    SEND_ON
 };
 
 const CloudCoreoJSRunner = require('cloudcoreo-jsrunner-commons');
