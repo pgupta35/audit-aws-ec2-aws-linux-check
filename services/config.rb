@@ -16,6 +16,7 @@ coreo_aws_advisor_alert "ec2-aws-linux-latest-not" do
   audit_objects ["reservation_set.instances_set.image_id"]
   operators ["=~"]
   alert_when [//]
+  id_map "object.reservation_set.instances_set.instance_id"
 end
 
 coreo_aws_advisor_ec2 "advise-ec2-samples-2" do
