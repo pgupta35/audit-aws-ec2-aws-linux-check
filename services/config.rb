@@ -11,7 +11,7 @@ coreo_aws_advisor_alert "ec2-aws-linux-latest-not" do
   display_name "Not Latest AWS Linux AMI Instance"
   description "Alerts on EC2 instances that were not launched from the latest AWS Linux AMI."
   category "Security"
-  suggested_action "Verify that if you run Amazon Linux that you launch from the latest Amazon Linux AMIs"
+  suggested_action "If you run Amazon Linux, verify that you launch instances from the latest Amazon Linux AMIs."
   level "Informational"
   objectives ["instances"]
   audit_objects ["reservation_set.instances_set.image_id"]
