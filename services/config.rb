@@ -7,10 +7,11 @@
 coreo_aws_advisor_alert "ec2-aws-linux-latest-not" do
   action :define
   service :ec2
-  display_name "Not Latest AWS Linux AMI Instances"
+  link "http://kb.cloudcoreo.com/mydoc_ec2-amazon-linux-not-latest.html"
+  display_name "Not Latest AWS Linux AMI Instance"
   description "Alerts on EC2 instances that were not launched from the latest AWS Linux AMI."
-  category "TBS"
-  suggested_action "TBS"
+  category "Security"
+  suggested_action "Verify that if you run Amazon Linux that you launch from the latest Amazon Linux AMIs"
   level "Informational"
   objectives ["instances"]
   audit_objects ["reservation_set.instances_set.image_id"]
