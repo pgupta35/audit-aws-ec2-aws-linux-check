@@ -80,7 +80,7 @@ end
 coreo_uni_util_jsrunner "jsrunner-process-suppression" do
   action :run
   provide_composite_access true
-  json_input 'COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.return'
+  json_input 'COMPOSITE::coreo_uni_util_jsrunner.jsrunner-get-not-aws-linux-ami-latest.report'
   packages([
                {
                    :name => "js-yaml",
@@ -95,7 +95,7 @@ coreo_uni_util_jsrunner "jsrunner-process-suppression" do
   } catch (e) {
   }
   coreoExport('suppression', JSON.stringify(suppression));
-  var violations = json_input.violations;
+  var violations = json_input;
   var result = {};
     var file_date = null;
     for (var violator_id in violations) {
@@ -168,7 +168,7 @@ end
 coreo_uni_util_jsrunner "jsrunner-process-table" do
   action :run
   provide_composite_access true
-  json_input 'COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.return'
+  json_input 'COMPOSITE::coreo_uni_util_jsrunner.jsrunner-get-not-aws-linux-ami-latest.report'
   packages([
                {
                    :name => "js-yaml",
