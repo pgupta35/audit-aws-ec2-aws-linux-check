@@ -187,13 +187,6 @@ coreo_uni_util_jsrunner "jsrunner-process-table" do
 end
 
 
-coreo_uni_util_variables "update-advisor-output" do
-  action :set
-  variables([
-       {'COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.report' => 'COMPOSITE::coreo_uni_util_jsrunner.jsrunner-process-suppressions.return'}
-      ])
-end
-
 coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
   action :run
   data_type "json"
