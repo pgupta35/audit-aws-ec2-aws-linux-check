@@ -9,7 +9,7 @@ variables:
     required: true
     type: string
     default: "change"
-  AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT:
+  AUDIT_AWS_EC2_LINUX_CHECK_ALERT_RECIPIENT:
     description: "this is who the full json report goes to"
     required: true
     type: string
