@@ -216,7 +216,7 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
   function <<-EOH
   
 const JSON_INPUT = json_input;
-const NO_OWNER_EMAIL = "${AUDIT_AWS_EC2_LINUX_CHECK_ALERT_RECIPIENT}";
+const NO_OWNER_EMAIL = "${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}";
 const OWNER_TAG = "${AUDIT_AWS_EC2_LINUX_CHECK_OWNER_TAG}";
 const ALLOW_EMPTY = "${AUDIT_AWS_EC2_LINUX_CHECK_ALLOW_EMPTY}";
 const SEND_ON = "${AUDIT_AWS_EC2_LINUX_CHECK_SEND_ON}";
@@ -235,7 +235,7 @@ end
 
 ## Send Notifiers
 coreo_uni_util_notify "advise-ec2-notify-non-current-aws-linux-instance-2" do
-  action :notify
+  action :${AUDIT_AWS_EC2_LINUX_CHECK_HTML_REPORT}
   notifiers 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.return'
 end
 
