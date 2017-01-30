@@ -43,25 +43,25 @@ coreo_uni_util_jsrunner "jsrunner-get-not-aws-linux-ami-latest" do
     }
 
     var result = {};
-    for (var region in json_input)
-      result[region] = {};
-      for (var inputKey in json_input[region]) {
-          var thisKey = inputKey;
-          var ami_id = json_input[region][thisKey]["violations"]["ec2-aws-linux-latest-not"]["result_info"][0]["object
-"]["image_id"];
-  
-          var cases = properties["variables"]["AWS_LINUX_AMI"]["cases"];
-          var is_violation = true;
-          for (var key in cases) {
-              value = cases[key];
-              if (ami_id === value) {
-                  is_violation = false;
-              }
-          }
-          if (is_violation === true) {
-              result[region][thisKey] = json_input[region][thisKey];
-          }
-      }
+    for (var region in json_input) {
+        result[region] = {};
+        for (var inputKey in json_input[region]) {
+            var thisKey = inputKey;
+            var ami_id = json_input[region][thisKey]["violations"]["ec2-aws-linux-latest-not"]["result_info"][0]["object"]["image_id"];
+    
+            var cases = properties["variables"]["AWS_LINUX_AMI"]["cases"];
+            var is_violation = true;
+            for (var key in cases) {
+                value = cases[key];
+                if (ami_id === value) {
+                    is_violation = false;
+                }
+            }
+            if (is_violation === true) {
+                result[region][thisKey] = json_input[region][thisKey];
+            }
+        }
+    }
 
     var rtn = result;
 
@@ -69,8 +69,7 @@ coreo_uni_util_jsrunner "jsrunner-get-not-aws-linux-ami-latest" do
 
 EOH
 end
-
-
+y
 coreo_uni_util_jsrunner "jsrunner-process-suppression" do
   action :run
   provide_composite_access true
@@ -161,7 +160,6 @@ coreo_uni_util_jsrunner "jsrunner-process-suppression" do
   EOH
 end
 
-
 coreo_uni_util_jsrunner "jsrunner-process-table" do
   action :run
   provide_composite_access true
@@ -182,7 +180,6 @@ coreo_uni_util_jsrunner "jsrunner-process-table" do
     callback(table);
   EOH
 end
-
 
 coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
   action :run
@@ -216,12 +213,10 @@ callback(notifiers);
   EOH
 end
 
-## Send Notifiers
 coreo_uni_util_notify "advise-ec2-notify-non-current-aws-linux-instance-2" do
   action :${AUDIT_AWS_EC2_LINUX_CHECK_HTML_REPORT}
   notifiers 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.return'
 end
-
 
 coreo_uni_util_jsrunner "tags-rollup-ec2" do
   action :run
@@ -247,7 +242,6 @@ rollup_string = rollup;
 callback(rollup_string);
   EOH
 end
-
 
 coreo_uni_util_notify "advise-ec2-rollup" do
   action :${AUDIT_AWS_EC2_LINUX_CHECK_ROLLUP_REPORT}
