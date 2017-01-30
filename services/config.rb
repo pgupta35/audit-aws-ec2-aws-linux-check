@@ -61,22 +61,24 @@ coreo_uni_util_jsrunner "jsrunner-get-not-aws-linux-ami-latest" do
     }
 
     var result = {};
-    for (var inputKey in json_input) {
-        var thisKey = inputKey;
-        var ami_id = json_input[thisKey]["violations"]["ec2-aws-linux-latest-not"]["violating_object"]["0"]["object"]["image_id"];
-
-        var cases = properties["variables"]["AWS_LINUX_AMI"]["cases"];
-        var is_violation = true;
-        for (var key in cases) {
-            value = cases[key];
-            if (ami_id === value) {
-                is_violation = false;
-            }
-        }
-        if (is_violation === true) {
-            result[thisKey] = json_input[thisKey];
-        }
-    }
+    for (var region in json_input)
+      result[region] = {};
+      for (var inputKey in json_input[region]) {
+          var thisKey = inputKey;
+          var ami_id = json_input[region][thisKey]["violations"]["ec2-aws-linux-latest-not"]["violating_object"]["0"]["object"]["image_id"];
+  
+          var cases = properties["variables"]["AWS_LINUX_AMI"]["cases"];
+          var is_violation = true;
+          for (var key in cases) {
+              value = cases[key];
+              if (ami_id === value) {
+                  is_violation = false;
+              }
+          }
+          if (is_violation === true) {
+              result[region][thisKey] = json_input[region][thisKey];
+          }
+      }
 
     var rtn = result;
 
@@ -96,78 +98,81 @@ coreo_uni_util_jsrunner "jsrunner-process-suppression" do
                    :version => "3.7.0"
                }       ])
   function <<-EOH
-  var fs = require('fs');
-  var yaml = require('js-yaml');
+  const fs = require('fs');
+  const yaml = require('js-yaml');
   let suppression;
   try {
       suppression = yaml.safeLoad(fs.readFileSync('./suppression.yaml', 'utf8'));
   } catch (e) {
   }
   coreoExport('suppression', JSON.stringify(suppression));
-  var violations = json_input.violations;
-  var result = {};
-    var file_date = null;
-    for (var violator_id in violations) {
-        result[violator_id] = {};
-        result[violator_id].tags = violations[violator_id].tags;
-        result[violator_id].violations = {}
-        for (var rule_id in violations[violator_id].violations) {
-            is_violation = true;
- 
-            result[violator_id].violations[rule_id] = violations[violator_id].violations[rule_id];
-            for (var suppress_rule_id in suppression) {
-                for (var suppress_violator_num in suppression[suppress_rule_id]) {
-                    for (var suppress_violator_id in suppression[suppress_rule_id][suppress_violator_num]) {
-                        file_date = null;
-                        var suppress_obj_id_time = suppression[suppress_rule_id][suppress_violator_num][suppress_violator_id];
-                        if (rule_id === suppress_rule_id) {
- 
-                            if (violator_id === suppress_violator_id) {
-                                var now_date = new Date();
- 
-                                if (suppress_obj_id_time === "") {
-                                    suppress_obj_id_time = new Date();
-                                } else {
-                                    file_date = suppress_obj_id_time;
-                                    suppress_obj_id_time = file_date;
-                                }
-                                var rule_date = new Date(suppress_obj_id_time);
-                                if (isNaN(rule_date.getTime())) {
-                                    rule_date = new Date(0);
-                                }
- 
-                                if (now_date <= rule_date) {
- 
-                                    is_violation = false;
- 
-                                    result[violator_id].violations[rule_id]["suppressed"] = true;
-                                    if (file_date != null) {
-                                        result[violator_id].violations[rule_id]["suppressed_until"] = file_date;
-                                        result[violator_id].violations[rule_id]["suppression_expired"] = false;
-                                    }
-                                }
-                            }
-                        }
-                    }
- 
-                }
-            }
-            if (is_violation) {
- 
-                if (file_date !== null) {
-                    result[violator_id].violations[rule_id]["suppressed_until"] = file_date;
-                    result[violator_id].violations[rule_id]["suppression_expired"] = true;
-                } else {
-                    result[violator_id].violations[rule_id]["suppression_expired"] = false;
-                }
-                result[violator_id].violations[rule_id]["suppressed"] = false;
-            }
-        }
-    }
- 
-    var rtn = result;
+  const violations = json_input.violations;
+  const result = {};
+  let file_date = null;
+  const regionKeys = Object.keys(violations);
+  regionKeys.forEach(region => {
+      result[region] = {};
+      const violationKeys = Object.keys(violations[region]);
+      violationKeys.forEach(violator_id => {
+          result[region][violator_id] = {};
+          result[region][violator_id].tags = violations[region][violator_id].tags;
+          result[region][violator_id].violations = {};
+          const ruleKeys = Object.keys(violations[region][violator_id].violations);
+          ruleKeys.forEach(rule_id => {
+              let is_violation = true;
+              result[region][violator_id].violations[rule_id] = violations[region][violator_id].violations[rule_id];
+              const suppressionRuleKeys = Object.keys(suppression);
+              suppressionRuleKeys.forEach(suppress_rule_id => {
+                  const suppressionViolatorNum = Object.keys(suppression[suppress_rule_id]);
+                  suppressionViolatorNum.forEach(suppress_violator_num => {
+                      const suppressViolatorIdKeys = Object.keys(suppression[suppress_rule_id][suppress_violator_num]);
+                      suppressViolatorIdKeys.forEach(suppress_violator_id => {
+                          file_date = null;
+                          let suppress_obj_id_time = suppression[suppress_rule_id][suppress_violator_num][suppress_violator_id];
+                          if (rule_id === suppress_rule_id) {
   
-  var rtn = result;
+                              if (violator_id === suppress_violator_id) {
+                                  const now_date = new Date();
+  
+                                  if (suppress_obj_id_time === "") {
+                                      suppress_obj_id_time = new Date();
+                                  } else {
+                                      file_date = suppress_obj_id_time;
+                                      suppress_obj_id_time = file_date;
+                                  }
+                                  let rule_date = new Date(suppress_obj_id_time);
+                                  if (isNaN(rule_date.getTime())) {
+                                      rule_date = new Date(0);
+                                  }
+  
+                                  if (now_date <= rule_date) {
+  
+                                      is_violation = false;
+  
+                                      result[region][violator_id].violations[rule_id]["suppressed"] = true;
+                                      if (file_date != null) {
+                                          result[region][violator_id].violations[rule_id]["suppressed_until"] = file_date;
+                                          result[region][violator_id].violations[rule_id]["suppression_expired"] = false;
+                                      }
+                                  }
+                              }
+                          }
+                      });
+                  });
+              });
+              if (is_violation) {
+  
+                  if (file_date !== null) {
+                      result[region][violator_id].violations[rule_id]["suppressed_until"] = file_date;
+                      result[region][violator_id].violations[rule_id]["suppression_expired"] = true;
+                  } else {
+                      result[region][violator_id].violations[rule_id]["suppression_expired"] = false;
+                  }
+                  result[region][violator_id].violations[rule_id]["suppressed"] = false;
+              }
+          });
+      });
+  });
   
   callback(result);
   EOH
@@ -202,7 +207,7 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
   packages([
                {
                    :name => "cloudcoreo-jsrunner-commons",
-                   :version => "1.6.4"
+                   :version => "1.7.0"
                }       ])
   json_input '{ "composite name":"PLAN::stack_name",
                 "plan name":"PLAN::name",
@@ -215,25 +220,14 @@ const NO_OWNER_EMAIL = "${AUDIT_AWS_EC2_LINUX_CHECK_ALERT_RECIPIENT}";
 const OWNER_TAG = "${AUDIT_AWS_EC2_LINUX_CHECK_OWNER_TAG}";
 const ALLOW_EMPTY = "${AUDIT_AWS_EC2_LINUX_CHECK_ALLOW_EMPTY}";
 const SEND_ON = "${AUDIT_AWS_EC2_LINUX_CHECK_SEND_ON}";
-const AUDIT_NAME = 'ec2-samples';
-const TABLES = json_input['table'];
 const SHOWN_NOT_SORTED_VIOLATIONS_COUNTER = false;
 
-const WHAT_NEED_TO_SHOWN_ON_TABLE = {
-    OBJECT_ID: { headerName: 'AWS Object ID', isShown: true},
-    REGION: { headerName: 'Region', isShown: true },
-    AWS_CONSOLE: { headerName: 'AWS Console', isShown: true },
-    TAGS: { headerName: 'Tags', isShown: true },
-    AMI: { headerName: 'AMI', isShown: true },
-    KILL_SCRIPTS: { headerName: 'Kill Cmd', isShown: false }
-};
-
-const VARIABLES = { NO_OWNER_EMAIL, OWNER_TAG, AUDIT_NAME,
-    WHAT_NEED_TO_SHOWN_ON_TABLE, ALLOW_EMPTY, SEND_ON,
-    undefined, undefined, SHOWN_NOT_SORTED_VIOLATIONS_COUNTER};
+const VARIABLES = { NO_OWNER_EMAIL, OWNER_TAG,
+  ALLOW_EMPTY, SEND_ON,
+  SHOWN_NOT_SORTED_VIOLATIONS_COUNTER};
 
 const CloudCoreoJSRunner = require('cloudcoreo-jsrunner-commons');
-const AuditEC2_LINUX_CHECK = new CloudCoreoJSRunner(JSON_INPUT, VARIABLES, TABLES);
+const AuditEC2_LINUX_CHECK = new CloudCoreoJSRunner(JSON_INPUT, VARIABLES);
 const notifiers = AuditEC2_LINUX_CHECK.getNotifiers();
 callback(notifiers);
   EOH
@@ -258,7 +252,7 @@ let numberOfViolations = 0;
 for (var entry=0; entry < json_input.length; entry++) {
     if (json_input[entry]['endpoint']['to'].length) {
         numberOfViolations += parseInt(json_input[entry]['num_violations']);
-        emailText += "recipient: " + json_input[entry]['endpoint']['to'] + " - " + "nViolations: " + json_input[entry]['num_violations'] + "\\n";
+        emailText += "recipient: " + json_input[entry]['endpoint']['to'] + " - " + "Violations: " + json_input[entry]['num_violations'] + "\\n";
     }
 }
 
