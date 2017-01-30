@@ -1,12 +1,3 @@
-###########################################
-# User Visible Rule Definitions
-###########################################
-
-
-# defines as the alert any EC2 instances that were launched more than 5 minutes ago
-# this set will be post-processed by the jsrunner below to examine the tags - nothing is directly
-# alerted on from this definition
-#
 
 coreo_aws_advisor_alert "ec2-aws-linux-latest-not" do
   action :define
@@ -24,20 +15,11 @@ coreo_aws_advisor_alert "ec2-aws-linux-latest-not" do
   id_map "object.reservation_set.instances_set.instance_id"
 end
 
-###########################################
-# Compsite-Internal Resources follow until end
-#   (Resources used by the system for execution and display processing)
-###########################################
-
 coreo_aws_advisor_ec2 "advise-ec2-samples-2" do
   alerts ["ec2-aws-linux-latest-not"]
   action :advise
   regions ${AUDIT_AWS_EC2_LINUX_CHECK_REGIONS}
 end
-
-# the jsrunner will now allow all regions to be specified in the above advisor instead of a single region
-
-# it will also allow the specification of a convention file in the composite to specify violation suppressions
 
 coreo_uni_util_jsrunner "jsrunner-get-not-aws-linux-ami-latest" do
   action :run
@@ -279,6 +261,6 @@ COMPOSITE::coreo_uni_util_jsrunner.tags-rollup-rds.return
   '
   payload_type 'text'
   endpoint ({
-      :to => '${AUDIT_AWS_EC2_LINUX_CHECK_ALERT_RECIPIENT}', :subject => 'CloudCoreo rds advisor alerts on PLAN::stack_name :: PLAN::name'
+      :to => '${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}', :subject => 'CloudCoreo rds advisor alerts on PLAN::stack_name :: PLAN::name'
   })
 end
