@@ -1,5 +1,5 @@
 
-coreo_aws_advisor_alert "ec2-aws-linux-latest-not" do
+coreo_aws_rule "ec2-aws-linux-latest-not" do
   action :define
   service :ec2
   link "http://kb.cloudcoreo.com/mydoc_ec2-amazon-linux-not-latest.html"
@@ -11,20 +11,20 @@ coreo_aws_advisor_alert "ec2-aws-linux-latest-not" do
   objectives ["instances"]
   audit_objects ["reservation_set.instances_set.image_id"]
   operators ["=~"]
-  alert_when [//]
+  raise_when [//]
   id_map "object.reservation_set.instances_set.instance_id"
 end
 
-coreo_aws_advisor_ec2 "advise-ec2-samples-2" do
-  alerts ["ec2-aws-linux-latest-not"]
-  action :advise
+coreo_aws_rule_runner_ec2 "advise-ec2-samples-2" do
+  rules ["ec2-aws-linux-latest-not"]
+  action :run
   regions ${AUDIT_AWS_EC2_LINUX_CHECK_REGIONS}
 end
 
 coreo_uni_util_jsrunner "jsrunner-get-not-aws-linux-ami-latest" do
   action :run
   provide_composite_access true
-  json_input 'COMPOSITE::coreo_aws_advisor_ec2.advise-ec2-samples-2.report'
+  json_input 'COMPOSITE::coreo_aws_rule_runner_ec2.advise-ec2-samples-2.report'
   packages([
                {
                    :name => "js-yaml",
@@ -255,6 +255,6 @@ COMPOSITE::coreo_uni_util_jsrunner.tags-rollup-rds.return
   '
   payload_type 'text'
   endpoint ({
-      :to => '${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}', :subject => 'CloudCoreo rds advisor alerts on PLAN::stack_name :: PLAN::name'
+      :to => '${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}', :subject => 'CloudCoreo rds rule results on PLAN::stack_name :: PLAN::name'
   })
 end
