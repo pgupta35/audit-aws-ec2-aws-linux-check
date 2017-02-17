@@ -15,11 +15,32 @@ coreo_aws_rule "ec2-aws-linux-latest-not" do
   id_map "object.reservation_set.instances_set.instance_id"
 end
 
+coreo_uni_util_variables "ec2-aws-linux-check-planwide" do
+  action :set
+  variables([
+                {'COMPOSITE::coreo_uni_util_variables.ec2-aws-linux-check-planwide.composite_name' => 'PLAN::stack_name'},
+                {'COMPOSITE::coreo_uni_util_variables.ec2-aws-linux-check-planwide.plan_name' => 'PLAN::name'},
+                {'COMPOSITE::coreo_uni_util_variables.ec2-aws-linux-check-planwide.results' => 'unset'},
+                {'COMPOSITE::coreo_uni_util_variables.ec2-aws-linux-check-planwide.number_violations' => 'unset'}
+            ])
+end
+
 coreo_aws_rule_runner_ec2 "advise-ec2-samples-2" do
   rules ["ec2-aws-linux-latest-not"]
   action :run
   regions ${AUDIT_AWS_EC2_LINUX_CHECK_REGIONS}
 end
+
+
+coreo_uni_util_variables "ec2-aws-linux-check-update-planwide-1" do
+  action :set
+  variables([
+                {'COMPOSITE::coreo_uni_util_variables.ec2-aws-linux-check-planwide.results' => 'COMPOSITE::coreo_aws_rule_runner_ec2.advise-ec2-samples-2.report'},
+                {'COMPOSITE::coreo_uni_util_variables.ec2-aws-linux-check-planwide.number_violations' => 'COMPOSITE::coreo_aws_rule_runner_ec2.advise-ec2-samples-2.number_violations'},
+
+            ])
+end
+
 
 coreo_uni_util_jsrunner "jsrunner-get-not-aws-linux-ami-latest" do
   action :run
@@ -69,132 +90,58 @@ coreo_uni_util_jsrunner "jsrunner-get-not-aws-linux-ami-latest" do
 
 EOH
 end
-y
-coreo_uni_util_jsrunner "jsrunner-process-suppression" do
-  action :run
-  provide_composite_access true
-  json_input '{"violations": COMPOSITE::coreo_uni_util_jsrunner.jsrunner-get-not-aws-linux-ami-latest.return}'
-  packages([
-               {
-                   :name => "js-yaml",
-                   :version => "3.7.0"
-               }       ])
-  function <<-EOH
-  const fs = require('fs');
-  const yaml = require('js-yaml');
-  let suppression;
-  try {
-      suppression = yaml.safeLoad(fs.readFileSync('./suppression.yaml', 'utf8'));
-  } catch (e) {
-  }
-  coreoExport('suppression', JSON.stringify(suppression));
-  const violations = json_input.violations;
-  const result = {};
-  let file_date = null;
-  const regionKeys = Object.keys(violations);
-  regionKeys.forEach(region => {
-      result[region] = {};
-      const violationKeys = Object.keys(violations[region]);
-      violationKeys.forEach(violator_id => {
-          result[region][violator_id] = {};
-          result[region][violator_id].tags = violations[region][violator_id].tags;
-          result[region][violator_id].violations = {};
-          const ruleKeys = Object.keys(violations[region][violator_id].violations);
-          ruleKeys.forEach(rule_id => {
-              let is_violation = true;
-              result[region][violator_id].violations[rule_id] = violations[region][violator_id].violations[rule_id];
-              const suppressionRuleKeys = Object.keys(suppression);
-              suppressionRuleKeys.forEach(suppress_rule_id => {
-                  const suppressionViolatorNum = Object.keys(suppression[suppress_rule_id]);
-                  suppressionViolatorNum.forEach(suppress_violator_num => {
-                      const suppressViolatorIdKeys = Object.keys(suppression[suppress_rule_id][suppress_violator_num]);
-                      suppressViolatorIdKeys.forEach(suppress_violator_id => {
-                          file_date = null;
-                          let suppress_obj_id_time = suppression[suppress_rule_id][suppress_violator_num][suppress_violator_id];
-                          if (rule_id === suppress_rule_id) {
-  
-                              if (violator_id === suppress_violator_id) {
-                                  const now_date = new Date();
-  
-                                  if (suppress_obj_id_time === "") {
-                                      suppress_obj_id_time = new Date();
-                                  } else {
-                                      file_date = suppress_obj_id_time;
-                                      suppress_obj_id_time = file_date;
-                                  }
-                                  let rule_date = new Date(suppress_obj_id_time);
-                                  if (isNaN(rule_date.getTime())) {
-                                      rule_date = new Date(0);
-                                  }
-  
-                                  if (now_date <= rule_date) {
-  
-                                      is_violation = false;
-  
-                                      result[region][violator_id].violations[rule_id]["suppressed"] = true;
-                                      if (file_date != null) {
-                                          result[region][violator_id].violations[rule_id]["suppressed_until"] = file_date;
-                                          result[region][violator_id].violations[rule_id]["suppression_expired"] = false;
-                                      }
-                                  }
-                              }
-                          }
-                      });
-                  });
-              });
-              if (is_violation) {
-  
-                  if (file_date !== null) {
-                      result[region][violator_id].violations[rule_id]["suppressed_until"] = file_date;
-                      result[region][violator_id].violations[rule_id]["suppression_expired"] = true;
-                  } else {
-                      result[region][violator_id].violations[rule_id]["suppression_expired"] = false;
-                  }
-                  result[region][violator_id].violations[rule_id]["suppressed"] = false;
-              }
-          });
-      });
-  });
-  
-  callback(result);
-  EOH
-end
-
-coreo_uni_util_jsrunner "jsrunner-process-table" do
-  action :run
-  provide_composite_access true
-  json_input '{"violations": COMPOSITE::coreo_uni_util_jsrunner.jsrunner-get-not-aws-linux-ami-latest.return}'
-  packages([
-               {
-                   :name => "js-yaml",
-                   :version => "3.7.0"
-               }       ])
-  function <<-EOH
-    var fs = require('fs');
-    var yaml = require('js-yaml');
-    try {
-        var table = yaml.safeLoad(fs.readFileSync('./table.yaml', 'utf8'));
-    } catch (e) {
-    }
-    coreoExport('table', JSON.stringify(table));
-    callback(table);
-  EOH
-end
 
 coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
   action :run
   data_type "json"
+  provide_composite_access true
   packages([
                {
                    :name => "cloudcoreo-jsrunner-commons",
-                   :version => "1.7.0"
+                   :version => "1.8.4"
+               },
+               {
+                   :name => "js-yaml",
+                   :version => "3.7.0"
                }       ])
   json_input '{ "composite name":"PLAN::stack_name",
                 "plan name":"PLAN::name",
-                "table": COMPOSITE::coreo_uni_util_jsrunner.jsrunner-process-table.return,
-                "violations": COMPOSITE::coreo_uni_util_jsrunner.jsrunner-process-suppression.return}'
+                "violations": COMPOSITE::coreo_uni_util_jsrunner.jsrunner-get-not-aws-linux-ami-latest.return}'
   function <<-EOH
   
+
+
+function setTableAndSuppression() {
+  let table;
+  let suppression;
+
+  const fs = require('fs');
+  const yaml = require('js-yaml');
+  try {
+      suppression = yaml.safeLoad(fs.readFileSync('./suppression.yaml', 'utf8'));
+  } catch (e) {
+      console.log("Error reading suppression.yaml file: ", e);
+      suppression = {};
+  }
+  try {
+      table = yaml.safeLoad(fs.readFileSync('./table.yaml', 'utf8'));
+  } catch (e) {
+      console.log("Error reading table.yaml file: ", e);
+      table = {};
+  }
+  coreoExport('table', JSON.stringify(table));
+  coreoExport('suppression', JSON.stringify(suppression));
+  
+  let alertListToJSON = "['ec2-aws-linux-latest-not']";
+  let alertListArray = alertListToJSON.replace(/'/g, '"');
+  json_input['alert list'] = alertListArray || [];
+  json_input['suppression'] = suppression || [];
+  json_input['table'] = table || {};
+}
+
+
+setTableAndSuppression();
+
 const JSON_INPUT = json_input;
 const NO_OWNER_EMAIL = "${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}";
 const OWNER_TAG = "${AUDIT_AWS_EC2_LINUX_CHECK_OWNER_TAG}";
@@ -208,43 +155,64 @@ const VARIABLES = { NO_OWNER_EMAIL, OWNER_TAG,
 
 const CloudCoreoJSRunner = require('cloudcoreo-jsrunner-commons');
 const AuditEC2_LINUX_CHECK = new CloudCoreoJSRunner(JSON_INPUT, VARIABLES);
+
+
+const JSONReportAfterGeneratingSuppression = AuditEC2_LINUX_CHECK.getJSONForAuditPanel();
+coreoExport('JSONReport', JSON.stringify(JSONReportAfterGeneratingSuppression));
+
 const notifiers = AuditEC2_LINUX_CHECK.getNotifiers();
 callback(notifiers);
   EOH
 end
 
-coreo_uni_util_notify "advise-ec2-notify-non-current-aws-linux-instance-2" do
-  action :${AUDIT_AWS_EC2_LINUX_CHECK_HTML_REPORT}
-  notifiers 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.return'
+coreo_uni_util_variables "ec2-aws-linux-check-update-planwide-3" do
+  action :set
+  variables([
+                {'COMPOSITE::coreo_uni_util_variables.ec2-aws-linux-check-planwide.results' => 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.JSONReport'},
+                {'COMPOSITE::coreo_uni_util_variables.ec2-aws-linux-check-planwide.table' => 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.table'}
+            ])
 end
+
 
 coreo_uni_util_jsrunner "tags-rollup-ec2" do
   action :run
   data_type "text"
   json_input 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.return'
   function <<-EOH
-var rollup_string = "";
-let rollup = '';
-let emailText = '';
-let numberOfViolations = 0;
-for (var entry=0; entry < json_input.length; entry++) {
-    if (json_input[entry]['endpoint']['to'].length) {
-        numberOfViolations += parseInt(json_input[entry]['num_violations']);
-        emailText += "recipient: " + json_input[entry]['endpoint']['to'] + " - " + "Violations: " + json_input[entry]['num_violations'] + "\\n";
-    }
+const notifiers = json_input;
+
+function setTextRollup() {
+    let emailText = '';
+    let numberOfViolations = 0;
+    notifiers.forEach(notifier => {
+        const hasEmail = notifier['endpoint']['to'].length;
+        if(hasEmail) {
+            numberOfViolations += parseInt(notifier['num_violations']);
+            emailText += "recipient: " + notifier['endpoint']['to'] + " - " + "Violations: " + notifier['num_violations'] + "\\n";
+        }
+    });
+
+    textRollup += 'Number of Violating Cloud Objects: ' + numberOfViolations + "\\n";
+    textRollup += 'Rollup' + "\\n";
+    textRollup += emailText;
 }
 
-rollup += 'number of Violations: ' + numberOfViolations + "\\n";
-rollup += 'Rollup' + "\\n";
-rollup += emailText;
 
-rollup_string = rollup;
-callback(rollup_string);
+let textRollup = '';
+setTextRollup();
+
+callback(textRollup);
   EOH
 end
 
+
+coreo_uni_util_notify "advise-ec2-notify-non-current-aws-linux-instance-2" do
+  action((("${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}".length > 0)) ? :notify : :nothing)
+  notifiers 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.return'
+end
+
 coreo_uni_util_notify "advise-ec2-rollup" do
-  action :${AUDIT_AWS_EC2_LINUX_CHECK_ROLLUP_REPORT}
+  action((("${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}".length > 0) and (! "${AUDIT_AWS_EC2_LINUX_CHECK_OWNER_TAG}".eql?("NOT_A_TAG"))) ? :notify : :nothing)
   type 'email'
   allow_empty ${AUDIT_AWS_EC2_LINUX_CHECK_ALLOW_EMPTY}
   send_on '${AUDIT_AWS_EC2_LINUX_CHECK_SEND_ON}'

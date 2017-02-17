@@ -29,15 +29,7 @@ This repo is designed to work with CloudCoreo. This composite is a collection of
 
 ### `AUDIT_AWS_EC2_LINUX_CHECK_REGIONS`:
   * description: List of AWS regions to check. Default is us-east-1,us-east-2,us-west-1,us-west-2,eu-west-1.
-  * default: us-east-1, us-east-2, us-west-1, us-west-2, eu-west-1
-
-### `AUDIT_AWS_EC2_LINUX_CHECK_ROLLUP_REPORT`:
-  * description: Would you like to send a rollup report? This is a short email that summarizes the number of checks performed and the number of violations found. Options - notify / nothing. Default is nothing.
-  * default: nothing
-
-### `AUDIT_AWS_EC2_LINUX_CHECK_HTML_REPORT`:
-  * description: Would you like to send a full report? This is an email that details any violations found and includes a list of the violating cloud objects. Options - notify / nothing. Default is nothing.
-  * default: nothing
+  * default: us-east-1, us-east-2, us-west-1, us-west-2, ca-central-1, ap-south-1, ap-northeast-2, ap-southeast-1, ap-southeast-2, ap-northeast-1, eu-central-1, eu-west-1, eu-west-2, sa-east-1
 
 
 ## Optional variables with default
