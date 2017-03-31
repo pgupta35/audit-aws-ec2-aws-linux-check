@@ -21,7 +21,7 @@ coreo_uni_util_variables "ec2-aws-linux-check-planwide" do
                 {'COMPOSITE::coreo_uni_util_variables.ec2-aws-linux-check-planwide.composite_name' => 'PLAN::stack_name'},
                 {'COMPOSITE::coreo_uni_util_variables.ec2-aws-linux-check-planwide.plan_name' => 'PLAN::name'},
                 {'COMPOSITE::coreo_uni_util_variables.ec2-aws-linux-check-planwide.results' => 'unset'},
-                {'COMPOSITE::coreo_uni_util_variables.ec2-aws-linux-check-planwide.number_violations' => 'unset'}
+                {'COMPOSITE::coreo_uni_util_variables.ec2-aws-linux-check-planwide.number_violations' => '0'}
             ])
 end
 
