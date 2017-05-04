@@ -1,4 +1,3 @@
-1. Audit
-1. Best Practices
-1. Alert
-1. EC2
+1. Operations
+1. AMI
+1. AWS Linux
