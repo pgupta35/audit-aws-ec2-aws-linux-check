@@ -54,7 +54,7 @@ This repo is designed to work with CloudCoreo. This composite is a collection of
 1. EC2
 
 ## Categories
-1. Audit
+1. AWS Operations Automation
 
 
 
