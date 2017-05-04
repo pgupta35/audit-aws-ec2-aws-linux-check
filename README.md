@@ -4,7 +4,7 @@ audit-aws-ec2-samples
 
 
 ## Description
-This repo is designed to work with CloudCoreo. This composite is a collection of sample EC2 definitions that have been requested by our customers and should be considered a starting point for building your own composites from.
+This composite ensures that all running EC2 instances are based on the latest AWS Linux AMI
 
 
 ## Hierarchy
@@ -48,10 +48,9 @@ This repo is designed to work with CloudCoreo. This composite is a collection of
   * description: The ami id for latest AWS Linux.
 
 ## Tags
-1. Audit
-1. Best Practices
-1. Alert
-1. EC2
+1. Operations
+1. AMI
+1. AWS Linux
 
 ## Categories
 1. AWS Operations Automation
