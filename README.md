@@ -1,6 +1,6 @@
-audit-aws-ec2-samples
+audit-aws-ec2-aws-linux-check
 ============================
-
+This composite ensures that all running EC2 instances are based on the latest AWS Linux AMI
 
 
 ## Description
@@ -8,7 +8,7 @@ This composite ensures that all running EC2 instances are based on the latest AW
 
 
 ## Hierarchy
-![composite inheritance hierarchy](https://raw.githubusercontent.com/CloudCoreo/audit-aws-ec2-samples/master/images/hierarchy.png "composite inheritance hierarchy")
+![composite inheritance hierarchy](https://raw.githubusercontent.com/CloudCoreo/audit-aws-ec2-aws-linux-check/master/images/hierarchy.png "composite inheritance hierarchy")
 
 
 
@@ -58,7 +58,7 @@ This composite ensures that all running EC2 instances are based on the latest AW
 
 
 ## Diagram
-![diagram](https://raw.githubusercontent.com/CloudCoreo/audit-aws-ec2-samples/master/images/diagram.png "diagram")
+![diagram](https://raw.githubusercontent.com/CloudCoreo/audit-aws-ec2-aws-linux-check/master/images/diagram.png "diagram")
 
 
 ## Icon
