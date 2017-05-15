@@ -143,7 +143,7 @@ function setTableAndSuppression() {
 setTableAndSuppression();
 
 const JSON_INPUT = json_input;
-const NO_OWNER_EMAIL = "mihail@cloudcoreo.com";
+const NO_OWNER_EMAIL = "${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}";
 const OWNER_TAG = "${AUDIT_AWS_EC2_LINUX_CHECK_OWNER_TAG}";
 const ALLOW_EMPTY = "${AUDIT_AWS_EC2_LINUX_CHECK_ALLOW_EMPTY}";
 const SEND_ON = "${AUDIT_AWS_EC2_LINUX_CHECK_SEND_ON}";
@@ -207,12 +207,12 @@ end
 
 
 coreo_uni_util_notify "advise-ec2-notify-non-current-aws-linux-instance-2" do
-  action((("mihail@cloudcoreo.com".length > 0)) ? :notify : :nothing)
+  action((("${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}".length > 0)) ? :notify : :nothing)
   notifiers 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.return'
 end
 
 coreo_uni_util_notify "advise-ec2-rollup" do
-  action((("mihail@cloudcoreo.com".length > 0) and (! "${AUDIT_AWS_EC2_LINUX_CHECK_OWNER_TAG}".eql?("NOT_A_TAG"))) ? :notify : :nothing)
+  action((("${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}".length > 0) and (! "${AUDIT_AWS_EC2_LINUX_CHECK_OWNER_TAG}".eql?("NOT_A_TAG"))) ? :notify : :nothing)
   type 'email'
   allow_empty ${AUDIT_AWS_EC2_LINUX_CHECK_ALLOW_EMPTY}
   send_on '${AUDIT_AWS_EC2_LINUX_CHECK_SEND_ON}'
@@ -223,6 +223,6 @@ COMPOSITE::coreo_uni_util_jsrunner.tags-rollup-rds.return
   '
   payload_type 'text'
   endpoint ({
-      :to => 'mihail@cloudcoreo.com', :subject => 'CloudCoreo rds rule results on PLAN::stack_name :: PLAN::name'
+      :to => '${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}', :subject => 'CloudCoreo rds rule results on PLAN::stack_name :: PLAN::name'
   })
 end
