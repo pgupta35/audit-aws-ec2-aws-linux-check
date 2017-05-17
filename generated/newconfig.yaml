@@ -1,0 +1,8 @@
+variables:
+    AUDIT_AWS_EC2_AWS_LINUX_CHECK_ALERT_LIST:
+        required: false
+        type: array
+        default:
+            - ec2-aws-linux-latest-not # 
+        description: "Which rules would you like to run? Possible values are ec2-aws-linux-latest-not"
+        description: "Which rules would you like to run? Possible values are "
