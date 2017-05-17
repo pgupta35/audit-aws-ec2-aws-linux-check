@@ -169,7 +169,7 @@ coreo_uni_util_variables "ec2-aws-linux-check-update-planwide-3" do
   action :set
   variables([
                 {'COMPOSITE::coreo_uni_util_variables.ec2-aws-linux-check-planwide.results' => 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.JSONReport'},
-                {'COMPOSITE::coreo_uni_util_variables.ec2-aws-linux-check-planwide.table' => 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.table'}
+                {'GLOBAL::table' => 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.table'}
             ])
 end
 
