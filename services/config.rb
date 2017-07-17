@@ -98,7 +98,7 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
   packages([
                {
                    :name => "cloudcoreo-jsrunner-commons",
-                   :version => "1.9.7-beta34"
+                   :version => "1.10.7-beta51"
                },
                {
                    :name => "js-yaml",
@@ -119,6 +119,7 @@ const NO_OWNER_EMAIL = "${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}";
 const OWNER_TAG = "${AUDIT_AWS_EC2_LINUX_CHECK_OWNER_TAG}";
 const ALLOW_EMPTY = "${AUDIT_AWS_EC2_LINUX_CHECK_ALLOW_EMPTY}";
 const SEND_ON = "${AUDIT_AWS_EC2_LINUX_CHECK_SEND_ON}";
+const htmlReportSubject = "${HTML_REPORT_SUBJECT}";
 
 const alertListArray = ["ec2-aws-linux-latest-not"];
 const ruleInputs = {};
@@ -154,13 +155,14 @@ setTable();
 const argForConfig = {
     NO_OWNER_EMAIL, cloudObjects, userSuppression, OWNER_TAG,
     userSchemes, alertListArray, ruleInputs, ALLOW_EMPTY,
-    SEND_ON, cloudAccount, compositeName, planName
+    SEND_ON, cloudAccount, compositeName, planName, htmlReportSubject
 }
 
 
 function createConfig(argForConfig) {
     let JSON_INPUT = {
         compositeName: argForConfig.compositeName,
+        htmlReportSubject: argForConfig.htmlReportSubject,
         planName: argForConfig.planName,
         violations: argForConfig.cloudObjects,
         userSchemes: argForConfig.userSchemes,
