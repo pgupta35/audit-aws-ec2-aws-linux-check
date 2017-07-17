@@ -1,4 +1,9 @@
 variables:
+  HTML_REPORT_SUBJECT:
+    required: false
+    type: string
+    default:
+    description: "Enter a custom report subject name."
   AUDIT_AWS_EC2_LINUX_CHECK_ALLOW_EMPTY:
     description: "Would you like to receive empty reports? Options - true / false. Default is false."
     required: true
