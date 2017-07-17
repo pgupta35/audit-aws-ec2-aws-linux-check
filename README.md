@@ -41,6 +41,9 @@ This composite ensures that all running EC2 instances are based on the latest AW
 
 ## Optional variables with no default
 
+### `HTML_REPORT_SUBJECT`:
+  * description: Enter a custom report subject name.
+
 ### `AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT`:
   * description: Enter the email address(es) that will receive notifications. If more than one, separate each with a comma.
 
