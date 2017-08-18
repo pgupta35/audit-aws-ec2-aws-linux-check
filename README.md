@@ -50,7 +50,7 @@ This composite ensures that all running EC2 instances are based on the latest AW
 ### `AWS_LINUX_AMI`:
   * description: The ami id for latest AWS Linux.
 
-### `S3_BUCKET_NAME`:
+### `AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME`:
   * description: Enter S3 bucket name to upload reports. (Optional)
 
 ## Tags
