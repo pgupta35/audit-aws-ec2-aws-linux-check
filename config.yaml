@@ -60,7 +60,7 @@ variables:
       required: false
       type: string
       default: "NOT_A_TAG"
-  S3_BUCKET_NAME:
+  AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME:
       required: false
       type: string
       default:
