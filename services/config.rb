@@ -299,10 +299,9 @@ coreo_aws_s3_policy "cloudcoreo-audit-aws-ec2-aws-linux-check-policy" do
   EOF
 end
 
-coreo_aws_s3_bucket "${AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME}" do
+coreo_aws_s3_bucket "bucket-${AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME}" do
   action((("${AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME}".length > 0) ) ? :create : :nothing)
   bucket_policies ["cloudcoreo-audit-aws-ec2-aws-linux-check-policy"]
-  region "us-east-1"
 end
 
 coreo_uni_util_notify "cloudcoreo-audit-aws-ec2-aws-linux-check-s3" do
