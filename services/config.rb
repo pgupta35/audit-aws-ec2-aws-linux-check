@@ -1,4 +1,3 @@
-
 coreo_aws_rule "ec2-aws-linux-latest-not" do
   action :define
   service :ec2
@@ -9,7 +8,7 @@ coreo_aws_rule "ec2-aws-linux-latest-not" do
   suggested_action "If you run Amazon Linux, verify that you launch instances from the latest Amazon Linux AMIs."
   level "Informational"
   objectives ["instances"]
-  audit_objects ["reservation_set.instances_set.image_id"]
+  audit_objects ["object.reservation_set.instances_set.image_id"]
   operators ["=~"]
   raise_when [//]
   id_map "object.reservation_set.instances_set.instance_id"
@@ -69,7 +68,7 @@ coreo_uni_util_jsrunner "jsrunner-get-not-aws-linux-ami-latest" do
         for (var inputKey in json_input[region]) {
             var thisKey = inputKey;
             var ami_id = json_input[region][thisKey]["violations"]["ec2-aws-linux-latest-not"]["result_info"][0]["object"]["image_id"];
-    
+
             var cases = properties["variables"]["AWS_LINUX_AMI"]["cases"];
             var is_violation = true;
             for (var key in cases) {
@@ -98,7 +97,7 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
   packages([
                {
                    :name => "cloudcoreo-jsrunner-commons",
-                   :version => "1.10.7-beta51"
+                   :version => "1.10.7-beta64"
                },
                {
                    :name => "js-yaml",
@@ -106,14 +105,16 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
                }       ])
   json_input '{ "composite name":"PLAN::stack_name",
                 "plan name":"PLAN::name",
+                "teamName":"PLAN::team_name",
                 "cloudAccountName": "PLAN::cloud_account_name",
                 "violations": COMPOSITE::coreo_uni_util_jsrunner.jsrunner-get-not-aws-linux-ami-latest.return}'
   function <<-EOH
-  
+
 const compositeName = json_input.compositeName;
 const planName = json_input.planName;
 const cloudAccount = json_input.cloudAccountName;
 const cloudObjects = json_input.violations;
+const teamName = json_input.teamName;
 
 const NO_OWNER_EMAIL = "${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}";
 const OWNER_TAG = "${AUDIT_AWS_EC2_LINUX_CHECK_OWNER_TAG}";
@@ -132,11 +133,18 @@ const yaml = require('js-yaml');
 
 function setSuppression() {
   try {
-    userSuppression = yaml.safeLoad(fs.readFileSync('./suppression.yaml', 'utf8'));
+      userSuppression = yaml.safeLoad(fs.readFileSync('./suppression.yaml', 'utf8'));
   } catch (e) {
-    console.log(`Error reading suppression.yaml file`);
-    userSuppression = [];
+    if (e.name==="YAMLException") {
+      throw new Error("Syntax error in suppression.yaml file. "+ e.message);
+    }
+    else{
+      console.log(e.name);
+      console.log(e.message);
+      userSuppression=[];
+    }
   }
+
   coreoExport('suppression', JSON.stringify(userSuppression));
 }
 
@@ -144,9 +152,16 @@ function setTable() {
   try {
     userSchemes = yaml.safeLoad(fs.readFileSync('./table.yaml', 'utf8'));
   } catch (e) {
-    console.log(`Error reading table.yaml file`);
-    userSchemes = {};
+    if (e.name==="YAMLException") {
+      throw new Error("Syntax error in table.yaml file. "+ e.message);
+    }
+    else{
+      console.log(e.name);
+      console.log(e.message);
+      userSchemes={};
+    }
   }
+
   coreoExport('table', JSON.stringify(userSchemes));
 }
 setSuppression();
@@ -155,7 +170,7 @@ setTable();
 const argForConfig = {
     NO_OWNER_EMAIL, cloudObjects, userSuppression, OWNER_TAG,
     userSchemes, alertListArray, ruleInputs, ALLOW_EMPTY,
-    SEND_ON, cloudAccount, compositeName, planName, htmlReportSubject
+    SEND_ON, cloudAccount, compositeName, planName, htmlReportSubject, teamName
 }
 
 
@@ -164,6 +179,7 @@ function createConfig(argForConfig) {
         compositeName: argForConfig.compositeName,
         htmlReportSubject: argForConfig.htmlReportSubject,
         planName: argForConfig.planName,
+        teamName: argForConfig.teamName,
         violations: argForConfig.cloudObjects,
         userSchemes: argForConfig.userSchemes,
         userSuppression: argForConfig.userSuppression,
@@ -212,17 +228,21 @@ const notifiers = json_input;
 function setTextRollup() {
     let emailText = '';
     let numberOfViolations = 0;
+    let usedEmails=new Map();
     notifiers.forEach(notifier => {
         const hasEmail = notifier['endpoint']['to'].length;
-        if(hasEmail) {
+        const email = notifier['endpoint']['to'];
+        if(hasEmail && usedEmails.get(email)!==true) {
+            usedEmails.set(email,true);
             numberOfViolations += parseInt(notifier['num_violations']);
-            emailText += "recipient: " + notifier['endpoint']['to'] + " - " + "Violations: " + notifier['num_violations'] + "\\n";
+            emailText += "recipient: " + notifier['endpoint']['to'] + " - " + "Violations: " + notifier['numberOfViolatingCloudObjects'] + ", Cloud Objects: "+ (notifier["num_violations"]-notifier['numberOfViolatingCloudObjects']) + "\\n";
         }
     });
 
-    textRollup += 'Number of Violating Cloud Objects: ' + numberOfViolations + "\\n";
+    textRollup += 'Total Number of matching Cloud Objects: ' + numberOfViolations + "\\n";
     textRollup += 'Rollup' + "\\n";
     textRollup += emailText;
+
 }
 
 
@@ -252,5 +272,47 @@ COMPOSITE::coreo_uni_util_jsrunner.tags-rollup-rds.return
   payload_type 'text'
   endpoint ({
       :to => '${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}', :subject => 'CloudCoreo rds rule results on PLAN::stack_name :: PLAN::name'
+  })
+end
+
+
+coreo_aws_s3_policy "cloudcoreo-audit-aws-ec2-aws-linux-check-policy" do
+  action((("${AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME}".length > 0) ) ? :create : :nothing)
+  policy_document <<-EOF
+{
+"Version": "2012-10-17",
+"Statement": [
+{
+"Sid": "",
+"Effect": "Allow",
+"Principal":
+{ "AWS": "*" }
+,
+"Action": "s3:*",
+"Resource": [
+"arn:aws:s3:::${AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME}/*",
+"arn:aws:s3:::${AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME}"
+]
+}
+]
+}
+  EOF
+end
+
+coreo_aws_s3_bucket "bucket-${AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME}" do
+  action((("${AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME}".length > 0) ) ? :create : :nothing)
+  bucket_policies ["cloudcoreo-audit-aws-ec2-aws-linux-check-policy"]
+end
+
+coreo_uni_util_notify "cloudcoreo-audit-aws-ec2-aws-linux-check-s3" do
+  action((("${AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME}".length > 0) ) ? :notify : :nothing)
+  type 's3'
+  allow_empty true
+  payload 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.report'
+  endpoint ({
+      object_name: 'ec2-aws-linux-check-json',
+      bucket_name: '${AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME}',
+      folder: 'ec2-aws-linux-check/PLAN::name',
+      properties: {}
   })
 end
