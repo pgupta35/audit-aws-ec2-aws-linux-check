@@ -311,7 +311,7 @@ coreo_uni_util_notify "cloudcoreo-audit-aws-ec2-aws-linux-check-s3" do
   payload 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.report'
   endpoint ({
       object_name: 'ec2-aws-linux-check-json',
-      bucket_name: '${AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME}',
+      bucket_name: 'bucket-${AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME}',
       folder: 'ec2-aws-linux-check/PLAN::name',
       properties: {}
   })
