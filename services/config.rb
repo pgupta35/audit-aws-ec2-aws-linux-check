@@ -97,7 +97,7 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
   packages([
                {
                    :name => "cloudcoreo-jsrunner-commons",
-                   :version => "1.10.7-beta64"
+                   :version => "1.10.7-beta65"
                },
                {
                    :name => "js-yaml",
