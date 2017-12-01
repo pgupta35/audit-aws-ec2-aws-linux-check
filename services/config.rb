@@ -41,7 +41,7 @@ coreo_uni_util_variables "ec2-aws-linux-check-planwide" do
 end
 
 coreo_aws_rule_runner_ec2 "advise-ec2-samples-2" do
-  rules ["ec2-aws-linux-latest-not"]
+  rules ["ec2-aws-linux-latest-not", "ec2-aws-linux-using-latest-ami"]
   action :run
   regions ${AUDIT_AWS_EC2_LINUX_CHECK_REGIONS}
 end
