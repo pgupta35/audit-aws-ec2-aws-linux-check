@@ -107,7 +107,7 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
                 "plan name":"PLAN::name",
                 "teamName":"PLAN::team_name",
                 "cloudAccountName": "PLAN::cloud_account_name",
-                "violations": COMPOSITE::coreo_uni_util_jsrunner.jsrunner-get-not-aws-linux-ami-latest.return}'
+                "violations": COMPOSITE::coreo_aws_rule_runner_ec2.advise-ec2-samples-2.report}'
   function <<-EOH
 
 const compositeName = json_input.compositeName;
