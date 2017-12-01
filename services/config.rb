@@ -67,23 +67,23 @@ coreo_uni_util_jsrunner "jsrunner-get-not-aws-linux-ami-latest" do
         result[region] = {};
         for (var inputKey in json_input[region]) {
             var thisKey = inputKey;
+            result[region][thisKey] = json_input[region][thisKey];
             var ami_id = json_input[region][thisKey]["violations"]["ec2-aws-linux-latest-not"]["result_info"][0]["object"]["image_id"];
-
             var cases = properties["variables"]["AWS_LINUX_AMI"]["cases"];
-            var is_violation = false;
+            var is_violation = true;
             for (var key in cases) {
                 value = cases[key];
                 if (ami_id === value) {
-                    is_violation = true;
+                    is_violation = false;
                 }
             }
             if (is_violation === true) {
-                result[region][thisKey] = json_input[region][thisKey];
+               delete result[region][thisKey]["violations"]["ec2-aws-linux-using-latest-ami"];
+            }else{
+               delete result[region][thisKey]["violations"]["ec2-aws-linux-latest-not"];
             }
         }
     }
-
-    var rtn = result;
 
     callback(result);
 
