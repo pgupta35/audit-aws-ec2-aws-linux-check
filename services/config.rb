@@ -56,7 +56,6 @@ coreo_uni_util_variables "ec2-aws-linux-check-update-planwide-1" do
             ])
 end
 
-
 coreo_uni_util_jsrunner "jsrunner-get-not-aws-linux-ami-latest" do
   action :run
   provide_composite_access true
@@ -99,12 +98,60 @@ coreo_uni_util_jsrunner "jsrunner-get-not-aws-linux-ami-latest" do
         }
     }
 
-    var rtn = result;
-
+   
     callback(result);
 
   EOH
 end
+
+coreo_uni_util_jsrunner "jsrunner-merge-latest-and-not-latest-aws-linux-ami" do
+  action :run
+  provide_composite_access true
+  json_input 'COMPOSITE::coreo_aws_rule_runner_ec2.advise-ec2-samples-2.report'
+  packages([
+               {
+                   :name => "js-yaml",
+                   :version => "3.7.0"
+               }])
+  function <<-EOH
+    var fs = require('fs');
+    var yaml = require('js-yaml');
+
+// Get document, or throw exception on error
+    try {
+        var properties = yaml.safeLoad(fs.readFileSync('./config.yaml', 'utf8'));
+        console.log(properties);
+    } catch (e) {
+        console.log(e);
+    }
+
+    var result = {};
+    for (var region in json_input) {
+        result[region] = {};
+        for (var inputKey in json_input[region]) {
+            var thisKey = inputKey;
+            var ami_id = json_input[region][thisKey]["violations"]["ec2-aws-linux-latest-not"]["result_info"][0]["object"]["image_id"];
+
+            var cases = properties["variables"]["AWS_LINUX_AMI"]["cases"];
+            var is_violation = false;
+            for (var key in cases) {
+                value = cases[key];
+                if (ami_id === value) {
+                    is_violation = true;
+                }
+            }
+            if (is_violation === true) {
+                result[region][thisKey] = json_input[region][thisKey];
+            }
+        }
+    }
+    result={omurbek:'i am omurbek'};
+   
+    callback(result);
+
+  EOH
+end
+
 
 coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
   action :run
@@ -123,7 +170,7 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
                 "plan name":"PLAN::name",
                 "teamName":"PLAN::team_name",
                 "cloudAccountName": "PLAN::cloud_account_name",
-                "violations": COMPOSITE::coreo_aws_rule_runner_ec2.advise-ec2-samples-2.report}'
+                "violations": COMPOSITE::coreo_uni_util_jsrunner.jsrunner-merge-latest-and-not-latest-aws-linux-ami.return}'
   function <<-EOH
 
 const compositeName = json_input.compositeName;
