@@ -145,7 +145,6 @@ coreo_uni_util_jsrunner "jsrunner-merge-latest-and-not-latest-aws-linux-ami" do
             }
         }
     }
-    result={omurbek:'i am omurbek'};
    
     callback(result);
 
