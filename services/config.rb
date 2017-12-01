@@ -14,6 +14,22 @@ coreo_aws_rule "ec2-aws-linux-latest-not" do
   id_map "object.reservation_set.instances_set.instance_id"
 end
 
+coreo_aws_rule "ec2-aws-linux-using-latest-ami" do
+  action :define
+  service :ec2
+  link "http://kb.cloudcoreo.com/mydoc_ec2-amazon-linux-not-latest.html"
+  display_name "Latest AWS Linux AMI Instance"
+  description "Alerts on EC2 instances that were launched from the latest AWS Linux AMI."
+  category "Security"
+  suggested_action "If you run Amazon Linux, verify that you launch instances from the latest Amazon Linux AMIs."
+  level "Informational"
+  objectives ["instances"]
+  audit_objects ["object.reservation_set.instances_set.image_id"]
+  operators ["=~"]
+  raise_when [//]
+  id_map "object.reservation_set.instances_set.instance_id"
+end
+
 coreo_uni_util_variables "ec2-aws-linux-check-planwide" do
   action :set
   variables([
@@ -25,7 +41,7 @@ coreo_uni_util_variables "ec2-aws-linux-check-planwide" do
 end
 
 coreo_aws_rule_runner_ec2 "advise-ec2-samples-2" do
-  rules ["ec2-aws-linux-latest-not"]
+  rules ["ec2-aws-linux-latest-not", "ec2-aws-linux-using-latest-ami"]
   action :run
   regions ${AUDIT_AWS_EC2_LINUX_CHECK_REGIONS}
 end
@@ -49,7 +65,7 @@ coreo_uni_util_jsrunner "jsrunner-get-not-aws-linux-ami-latest" do
                {
                    :name => "js-yaml",
                    :version => "3.7.0"
-               }       ])
+               }])
   function <<-EOH
     var fs = require('fs');
     var yaml = require('js-yaml');
@@ -87,7 +103,7 @@ coreo_uni_util_jsrunner "jsrunner-get-not-aws-linux-ami-latest" do
 
     callback(result);
 
-EOH
+  EOH
 end
 
 coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
@@ -102,7 +118,7 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
                {
                    :name => "js-yaml",
                    :version => "3.7.0"
-               }       ])
+               }])
   json_input '{ "composite name":"PLAN::stack_name",
                 "plan name":"PLAN::name",
                 "teamName":"PLAN::team_name",
@@ -260,7 +276,7 @@ coreo_uni_util_notify "advise-ec2-notify-non-current-aws-linux-instance-2" do
 end
 
 coreo_uni_util_notify "advise-ec2-rollup" do
-  action((("${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}".length > 0) and (! "${AUDIT_AWS_EC2_LINUX_CHECK_OWNER_TAG}".eql?("NOT_A_TAG"))) ? :notify : :nothing)
+  action((("${AUDIT_AWS_EC2_LINUX_CHECK_RECIPIENT}".length > 0) and (!"${AUDIT_AWS_EC2_LINUX_CHECK_OWNER_TAG}".eql?("NOT_A_TAG"))) ? :notify : :nothing)
   type 'email'
   allow_empty ${AUDIT_AWS_EC2_LINUX_CHECK_ALLOW_EMPTY}
   send_on '${AUDIT_AWS_EC2_LINUX_CHECK_SEND_ON}'
@@ -277,7 +293,7 @@ end
 
 
 coreo_aws_s3_policy "cloudcoreo-audit-aws-ec2-aws-linux-check-policy" do
-  action((("${AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME}".length > 0) ) ? :create : :nothing)
+  action((("${AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME}".length > 0)) ? :create : :nothing)
   policy_document <<-EOF
 {
 "Version": "2012-10-17",
@@ -300,12 +316,12 @@ coreo_aws_s3_policy "cloudcoreo-audit-aws-ec2-aws-linux-check-policy" do
 end
 
 coreo_aws_s3_bucket "bucket-${AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME}" do
-  action((("${AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME}".length > 0) ) ? :create : :nothing)
+  action((("${AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME}".length > 0)) ? :create : :nothing)
   bucket_policies ["cloudcoreo-audit-aws-ec2-aws-linux-check-policy"]
 end
 
 coreo_uni_util_notify "cloudcoreo-audit-aws-ec2-aws-linux-check-s3" do
-  action((("${AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME}".length > 0) ) ? :notify : :nothing)
+  action((("${AUDIT_AWS_EC2-AWS-LINUX_CHECK_S3_NOTIFICATION_BUCKET_NAME}".length > 0)) ? :notify : :nothing)
   type 's3'
   allow_empty true
   payload 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.report'
