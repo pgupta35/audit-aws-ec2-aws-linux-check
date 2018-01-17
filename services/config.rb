@@ -95,10 +95,14 @@ coreo_uni_util_jsrunner "jsrunner-get-not-aws-linux-ami-latest" do
                 }
             }
             if (is_violation === true) {
-               console.log('################');
-               console.log(candidate);
                result[region][thisKey]=candidate;
             }else{
+               candidate["violations"]["ec2-aws-linux-using-latest-ami"]=candidate["violations"]["ec2-aws-linux-latest-not"];
+               candidate["violations"]["ec2-aws-linux-using-latest-ami"].display_name="Latest AWS Linux AMI Instance"; 
+               candidate["violations"]["ec2-aws-linux-using-latest-ami"].description="Alerts on EC2 instances that were launched from the latest AWS Linux AMI."; 
+               candidate["violations"]["ec2-aws-linux-using-latest-ami"].suggested_action="If you run Amazon Linux, verify that you launch instances from the latest Amazon Linux AMIs."; 
+               delete candidate["violations"]["ec2-aws-linux-latest-not"];
+               result[region][thisKey]=candidate;
             }
         }
     }
