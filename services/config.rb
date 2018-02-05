@@ -14,22 +14,6 @@ coreo_aws_rule "ec2-aws-linux-latest-not" do
   id_map "object.reservation_set.instances_set.instance_id"
 end
 
-coreo_aws_rule "ec2-aws-linux-using-latest-ami" do
-  action :define
-  service :ec2
-  link "http://kb.cloudcoreo.com/mydoc_ec2-amazon-linux-not-latest.html"
-  display_name "Latest AWS Linux AMI Instance"
-  description "Alerts on EC2 instances that were launched from the latest AWS Linux AMI."
-  category "Security"
-  suggested_action "If you run Amazon Linux, verify that you launch instances from the latest Amazon Linux AMIs."
-  level "Informational"
-  objectives ["instances"]
-  audit_objects ["object.reservation_set.instances_set.image_id"]
-  operators ["=~"]
-  raise_when [//]
-  id_map "object.reservation_set.instances_set.instance_id"
-end
-
 coreo_uni_util_variables "ec2-aws-linux-check-planwide" do
   action :set
   variables([
@@ -41,7 +25,7 @@ coreo_uni_util_variables "ec2-aws-linux-check-planwide" do
 end
 
 coreo_aws_rule_runner_ec2 "advise-ec2-samples-2" do
-  rules ["ec2-aws-linux-latest-not", "ec2-aws-linux-using-latest-ami"]
+  rules ["ec2-aws-linux-latest-not"]
   action :run
   regions ${AUDIT_AWS_EC2_LINUX_CHECK_REGIONS}
 end
@@ -83,7 +67,7 @@ coreo_uni_util_jsrunner "jsrunner-get-not-aws-linux-ami-latest" do
         result[region] = {};
         for (var inputKey in json_input[region]) {
             var thisKey = inputKey;
-            result[region][thisKey] = json_input[region][thisKey];
+            var candidate = json_input[region][thisKey];
             var ami_id = json_input[region][thisKey]["violations"]["ec2-aws-linux-latest-not"]["result_info"][0]["object"]["image_id"];
             var cases = properties["variables"]["AWS_LINUX_AMI"]["cases"];
             var is_violation = true;
@@ -91,12 +75,18 @@ coreo_uni_util_jsrunner "jsrunner-get-not-aws-linux-ami-latest" do
                 value = cases[key];
                 if (ami_id === value) {
                     is_violation = false;
+                    break;
                 }
             }
             if (is_violation === true) {
-               delete result[region][thisKey]["violations"]["ec2-aws-linux-using-latest-ami"];
+               result[region][thisKey]=candidate;
             }else{
-               delete result[region][thisKey]["violations"]["ec2-aws-linux-latest-not"];
+               candidate["violations"]["ec2-aws-linux-using-latest-ami"]=candidate["violations"]["ec2-aws-linux-latest-not"];
+               candidate["violations"]["ec2-aws-linux-using-latest-ami"].display_name="Latest AWS Linux AMI Instance"; 
+               candidate["violations"]["ec2-aws-linux-using-latest-ami"].description="Alerts on EC2 instances that were launched from the latest AWS Linux AMI."; 
+               candidate["violations"]["ec2-aws-linux-using-latest-ami"].suggested_action="If you run Amazon Linux, verify that you launch instances from the latest Amazon Linux AMIs."; 
+               delete candidate["violations"]["ec2-aws-linux-latest-not"];
+               result[region][thisKey]=candidate;
             }
         }
     }
@@ -119,8 +109,8 @@ coreo_uni_util_jsrunner "tags-to-notifiers-array-2" do
                    :name => "js-yaml",
                    :version => "3.7.0"
                }       ])
-  json_input '{ "composite name":"PLAN::stack_name",
-                "plan name":"PLAN::name",
+  json_input '{ "compositeName":"PLAN::stack_name",
+                "planName":"PLAN::name",
                 "teamName":"PLAN::team_name",
                 "cloudAccountName": "PLAN::cloud_account_name",
                 "violations": COMPOSITE::coreo_uni_util_jsrunner.jsrunner-get-not-aws-linux-ami-latest.return}'
