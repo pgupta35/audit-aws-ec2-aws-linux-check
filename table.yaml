@@ -1,9 +1,11 @@
 ec2-aws-linux-latest-not:
   "EC2 Instance": "__OBJECT__~https://console.aws.amazon.com/ec2/v2/home?region=+__OBJECT__.violations.__RULE__.region+#Instances:search=__OBJECT__;sort=instanceId"
+  "AMI ID": "+__OBJECT__.violations.__RULE__.result_info.0.object.image_id+"
   "AWS Region": "+__OBJECT__.violations.__RULE__.region+"
   "AWS Tags": "__TAGS__"
 ec2-aws-linux-using-latest-ami:
   "EC2 Instance": "__OBJECT__~https://console.aws.amazon.com/ec2/v2/home?region=+__OBJECT__.violations.__RULE__.region+#Instances:search=__OBJECT__;sort=instanceId"
+  "AMI ID": "+__OBJECT__.violations.__RULE__.result_info.0.object.image_id+"
   "AWS Region": "+__OBJECT__.violations.__RULE__.region+"
   "AWS Tags": "__TAGS__"
 default:
