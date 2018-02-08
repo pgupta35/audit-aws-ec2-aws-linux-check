@@ -2,6 +2,7 @@ coreo_aws_rule "ec2-aws-linux-latest-not" do
   action :define
   service :ec2
   link "http://kb.cloudcoreo.com/mydoc_ec2-amazon-linux-not-latest.html"
+  include_violations_in_count false
   display_name "Not Latest AWS Linux AMI Instance"
   description "Alerts on EC2 instances that were not launched from the latest AWS Linux AMI."
   category "Security"
