@@ -2,6 +2,7 @@ coreo_aws_rule "ec2-aws-linux-latest-not" do
   action :define
   service :ec2
   link "http://kb.cloudcoreo.com/mydoc_ec2-amazon-linux-not-latest.html"
+  include_violations_in_count false
   display_name "Not Latest AWS Linux AMI Instance"
   description "Alerts on EC2 instances that were not launched from the latest AWS Linux AMI."
   category "Security"
@@ -219,6 +220,7 @@ coreo_uni_util_variables "ec2-aws-linux-check-update-planwide-3" do
   action :set
   variables([
                 {'COMPOSITE::coreo_uni_util_variables.ec2-aws-linux-check-planwide.results' => 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.JSONReport'},
+                {'COMPOSITE::coreo_aws_rule_runner_ec2.advise-ec2-samples-2.report' => 'COMPOSITE::coreo_uni_util_jsrunner.jsrunner-get-not-aws-linux-ami-latest.return'},
                 {'GLOBAL::table' => 'COMPOSITE::coreo_uni_util_jsrunner.tags-to-notifiers-array-2.table'}
             ])
 end
